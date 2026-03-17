@@ -330,11 +330,8 @@ def test_table_add_success(client, mock_workspace_id, mock_category_id):
             workspace_id=mock_workspace_id,
             category_id=mock_category_id,
             name="货物明细表",
-            columns=[
-                {"name": "商品名称", "type": "text"},
-                {"name": "数量", "type": "number"},
-                {"name": "单价", "type": "number"}
-            ]
+            prompt="请抽取每行的商品名称、数量和单价",
+            collect_from_multi_table=True
         )
 
         # 验证返回结果
@@ -350,6 +347,7 @@ def test_table_update_validation(client):
             workspace_id="123",
             category_id="456",
             table_id="",
+            collect_from_multi_table=True,
             name="测试"
         )
 
@@ -369,7 +367,9 @@ def test_table_update_success(client, mock_workspace_id, mock_category_id):
             workspace_id=mock_workspace_id,
             category_id=mock_category_id,
             table_id="800001",
-            name="更新后的表格名称"
+            collect_from_multi_table=True,
+            name="更新后的表格名称",
+            prompt="请抽取每行的品名、数量和金额"
         )
 
         # update 方法返回 None，只验证没有抛出异常

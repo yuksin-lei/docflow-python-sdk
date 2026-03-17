@@ -526,7 +526,8 @@ class CategoryTableResource(BaseResource):
         workspace_id: str,
         category_id: str,
         name: str,
-        description: Optional[str] = None,
+        prompt: Optional[str] = None,
+        collect_from_multi_table: Optional[bool] = None,
         **kwargs,
     ) -> TableAddResponse:
         """
@@ -536,7 +537,8 @@ class CategoryTableResource(BaseResource):
             workspace_id: 工作空间 ID
             category_id: 类别 ID
             name: 表格名称
-            description: 表格描述（可选）
+            prompt: 表格语义抽取提示词（可选，最大200字符）
+            collect_from_multi_table: 多表合并（可选）
             **kwargs: 其他表格配置参数
 
         Returns:
@@ -547,7 +549,7 @@ class CategoryTableResource(BaseResource):
             ...     workspace_id="123",
             ...     category_id="456",
             ...     name="商品明细表",
-            ...     description="记录商品信息"
+            ...     prompt="请抽取每行的品名、数量和金额"
             ... )
             >>> print(table.table_id)
         """
@@ -567,8 +569,11 @@ class CategoryTableResource(BaseResource):
             "name": name,
         }
 
-        if description:
-            payload["description"] = description
+        if prompt is not None:
+            payload["prompt"] = prompt
+
+        if collect_from_multi_table is not None:
+            payload["collect_from_multi_table"] = collect_from_multi_table
 
         payload.update(kwargs)
 
@@ -583,8 +588,9 @@ class CategoryTableResource(BaseResource):
         workspace_id: str,
         category_id: str,
         table_id: str,
+        collect_from_multi_table: bool,
         name: Optional[str] = None,
-        description: Optional[str] = None,
+        prompt: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -594,8 +600,9 @@ class CategoryTableResource(BaseResource):
             workspace_id: 工作空间 ID
             category_id: 类别 ID
             table_id: 表格 ID
-            name: 新的表格名称（可选）
-            description: 新的描述（可选）
+            collect_from_multi_table: 多表合并（必填）
+            name: 新的表格名称（可选，最大50字符）
+            prompt: 新的表格语义抽取提示词（可选，最大200字符）
             **kwargs: 其他要更新的字段
 
         Examples:
@@ -603,6 +610,7 @@ class CategoryTableResource(BaseResource):
             ...     workspace_id="123",
             ...     category_id="456",
             ...     table_id="789",
+            ...     collect_from_multi_table=True,
             ...     name="更新后的表格名称"
             ... )
         """
@@ -615,6 +623,7 @@ class CategoryTableResource(BaseResource):
             "workspace_id": workspace_id,
             "category_id": category_id,
             "table_id": table_id,
+            "collect_from_multi_table": collect_from_multi_table,
         }
 
         if name is not None:
@@ -625,8 +634,8 @@ class CategoryTableResource(BaseResource):
             )
             payload["name"] = name
 
-        if description is not None:
-            payload["description"] = description
+        if prompt is not None:
+            payload["prompt"] = prompt
 
         payload.update(kwargs)
 
@@ -732,6 +741,7 @@ class CategoryFieldResource(BaseResource):
         category_id: str,
         name: str,
         description: Optional[str] = None,
+        table_id: Optional[str] = None,
         **kwargs,
     ) -> FieldAddResponse:
         """
@@ -742,6 +752,7 @@ class CategoryFieldResource(BaseResource):
             category_id: 类别 ID
             name: 字段名称
             description: 字段描述（可选）
+            table_id: 字段所属表格id（可选）
             **kwargs: 其他字段配置参数，如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -818,6 +829,9 @@ class CategoryFieldResource(BaseResource):
         if description:
             payload["description"] = description
 
+        if table_id:
+            payload["table_id"] = table_id
+
         payload.update(kwargs)
 
         response = self.http_client.post(
@@ -872,6 +886,7 @@ class CategoryFieldResource(BaseResource):
         field_id: str,
         name: Optional[str] = None,
         description: Optional[str] = None,
+        table_id: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -883,6 +898,7 @@ class CategoryFieldResource(BaseResource):
             field_id: 字段 ID
             name: 新的字段名称（可选）
             description: 新的描述（可选）
+            table_id: 字段所属表格id（可选）
             **kwargs: 其他要更新的字段配置参数，如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -932,6 +948,9 @@ class CategoryFieldResource(BaseResource):
         if description is not None:
             payload["description"] = description
 
+        if table_id is not None:
+            payload["table_id"] = table_id
+
         payload.update(kwargs)
 
         self.http_client.post(
@@ -939,7 +958,7 @@ class CategoryFieldResource(BaseResource):
         )
 
     def delete(
-        self, workspace_id: str, category_id: str, field_ids: List[str]
+        self, workspace_id: str, category_id: str, field_ids: List[str], table_id: Optional[str] = None
     ) -> None:
         """
         批量删除字段
@@ -954,6 +973,7 @@ class CategoryFieldResource(BaseResource):
             ...     workspace_id="123",
             ...     category_id="456",
             ...     field_ids=["789", "101"]
+            ...     table_id="498",
             ... )
         """
         # 参数校验
@@ -974,6 +994,9 @@ class CategoryFieldResource(BaseResource):
             "category_id": category_id,
             "field_ids": field_ids,
         }
+
+        if table_id is not None:
+            payload["table_id"] = table_id
 
         self.http_client.post(
             f"{API_PREFIX}/category/fields/delete", json_data=payload

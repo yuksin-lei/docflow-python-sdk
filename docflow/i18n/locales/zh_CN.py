@@ -33,6 +33,7 @@ TRANSLATIONS = {
     # 工作空间相关
     'error.workspace.name_empty': '工作空间名称不能为空',
     'error.workspace.name_too_long': '工作空间名称不能超过 {max_length} 个字符',
+    'error.workspace.description_too_long': '工作空间描述不能超过 {max_length} 个字符',
     'error.workspace.id_empty': '工作空间 ID 不能为空',
     'error.workspace.id_invalid': '工作空间 ID 格式错误',
     'error.workspace.not_found': '工作空间不存在',
@@ -40,6 +41,7 @@ TRANSLATIONS = {
     'error.workspace.delete_list_empty': 'workspace_ids 不能为空',
     'error.workspace.page_invalid': '页码必须大于等于 1',
     'error.workspace.page_size_invalid': '每页数量必须在 1-100 之间',
+    'error.workspace.callback_retry_time_invalid': '回调重试次数必须在 1-3 之间',
 
     # 类别相关
     'error.category.name_invalid': '类别名称不能为空且最大长度为 50 字符',
@@ -76,7 +78,13 @@ TRANSLATIONS = {
     'error.review_task.repo_id_invalid': '审核规则库 ID 必须是数字字符串',
     'error.review_task.rule_id_empty': '审核规则 ID 不能为空',
     'error.review_task.rule_id_invalid': '审核规则 ID 必须是数字字符串',
-    
+
+    # 文件上传相关
+    'error.file.upload_source_required': 'file_path 和 file_urls 必须提供其中之一',
+    'error.file.upload_source_conflict': 'file_path 和 file_urls 不能同时提供',
+    'error.file.urls_empty': 'file_urls 不能为空列表',
+    'error.file.urls_too_many': 'file_urls 最多支持 {max_count} 个 URL',
+
     # API 错误
     'error.api.request_failed': 'API 请求失败',
     'error.api.response_parse_failed': '响应解析失败',

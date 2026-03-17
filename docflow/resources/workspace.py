@@ -94,8 +94,8 @@ class WorkspaceResource(BaseResource):
         self,
         enterprise_id: int,
         name: str,
-        auth_scope: Optional[Union[AuthScope, int]] = None,
-        manage_account_id: Optional[int] = None,
+        auth_scope: Union[AuthScope, int],
+        description: Optional[str] = None,
         **kwargs
     ) -> WorkspaceCreateResponse:
         """
@@ -104,8 +104,8 @@ class WorkspaceResource(BaseResource):
         Args:
             enterprise_id: 企业 ID
             name: 工作空间名称（最大 50 字符）
-            auth_scope: 权限范围（AuthScope.PRIVATE=0 或 AuthScope.PUBLIC=1，可选）
-            manage_account_id: 管理账号 ID（可选）
+            auth_scope: 权限范围（AuthScope.PRIVATE=0 或 AuthScope.PUBLIC=1，必填）
+            description: 空间描述（可选，最大 200 字符）
             **kwargs: 其他可选参数
 
         Returns:
@@ -122,7 +122,8 @@ class WorkspaceResource(BaseResource):
             >>> workspace = client.workspace.create(
             ...     enterprise_id=12345,
             ...     name="我的工作空间",
-            ...     auth_scope=AuthScope.PUBLIC
+            ...     auth_scope=AuthScope.PUBLIC,
+            ...     description="这是一个用于处理发票的工作空间"
             ... )
             >>>
             >>> # 也支持直接使用数字
@@ -147,23 +148,29 @@ class WorkspaceResource(BaseResource):
                 max_length=50
             )
 
+        if description is not None and len(description) > 200:
+            raise ValidationError(
+                "工作空间描述不能超过 200 个字符",
+                i18n_key='error.workspace.description_too_long',
+                max_length=200
+            )
+
+        # 支持 AuthScope 枚举和 int 类型
+        auth_scope_value = auth_scope.value if isinstance(auth_scope, AuthScope) else auth_scope
+        if auth_scope_value not in (0, 1):
+            raise ValidationError(
+                "auth_scope 只能是 AuthScope.PRIVATE(0) 或 AuthScope.PUBLIC(1)",
+                i18n_key='error.workspace.auth_scope_invalid'
+            )
+
         payload = {
             "enterprise_id": enterprise_id,
             "name": name,
+            "auth_scope": auth_scope_value,
         }
 
-        if auth_scope is not None:
-            # 支持 AuthScope 枚举和 int 类型
-            auth_scope_value = auth_scope.value if isinstance(auth_scope, AuthScope) else auth_scope
-            if auth_scope_value not in (0, 1):
-                raise ValidationError(
-                    "auth_scope 只能是 AuthScope.PRIVATE(0) 或 AuthScope.PUBLIC(1)",
-                    i18n_key='error.workspace.auth_scope_invalid'
-                )
-            payload["auth_scope"] = auth_scope_value
-
-        if manage_account_id is not None:
-            payload["manage_account_id"] = manage_account_id
+        if description is not None:
+            payload["description"] = description
 
         payload.update(kwargs)
 
@@ -259,8 +266,11 @@ class WorkspaceResource(BaseResource):
     def update(
         self,
         workspace_id: str,
-        name: Optional[str] = None,
-        auth_scope: Optional[Union[AuthScope, int]] = None,
+        name: str,
+        auth_scope: Union[AuthScope, int],
+        description: Optional[str] = None,
+        callback_url: Optional[str] = None,
+        callback_retry_time: Optional[int] = None,
         **kwargs
     ) -> None:
         """
@@ -268,8 +278,11 @@ class WorkspaceResource(BaseResource):
 
         Args:
             workspace_id: 工作空间 ID
-            name: 新的工作空间名称（可选）
-            auth_scope: 新的权限范围（AuthScope.PRIVATE=0 或 AuthScope.PUBLIC=1，可选）
+            name: 工作空间名称（最大 50 字符）
+            auth_scope: 权限范围（AuthScope.PRIVATE=0 或 AuthScope.PUBLIC=1）
+            description: 空间描述（可选，最大 200 字符）
+            callback_url: 回调URL（可选）
+            callback_retry_time: 回调重试次数（可选，范围 1-3）
             **kwargs: 其他可选参数
 
         Raises:
@@ -285,7 +298,10 @@ class WorkspaceResource(BaseResource):
             >>> client.workspace.update(
             ...     workspace_id="123",
             ...     name="新的工作空间名称",
-            ...     auth_scope=AuthScope.PRIVATE
+            ...     auth_scope=AuthScope.PRIVATE,
+            ...     description="更新后的描述",
+            ...     callback_url="https://example.com/callback",
+            ...     callback_retry_time=3
             ... )
             >>>
             >>> # 也支持直接使用数字
@@ -307,32 +323,54 @@ class WorkspaceResource(BaseResource):
                 i18n_key='error.workspace.id_invalid'
             )
 
+        if not name or not name.strip():
+            raise ValidationError(
+                "工作空间名称不能为空",
+                i18n_key='error.workspace.name_empty'
+            )
 
-        payload = {"workspace_id": workspace_id}
+        if len(name) > 50:
+            raise ValidationError(
+                "工作空间名称不能超过 50 个字符",
+                i18n_key='error.workspace.name_too_long',
+                max_length=50
+            )
 
-        if name is not None:
-            if not name.strip():
-                raise ValidationError(
-                    "工作空间名称不能为空",
-                    i18n_key='error.workspace.name_empty'
-                )
-            if len(name) > 50:
-                raise ValidationError(
-                    "工作空间名称不能超过 50 个字符",
-                    i18n_key='error.workspace.name_too_long',
-                    max_length=50
-                )
-            payload["name"] = name
+        # 支持 AuthScope 枚举和 int 类型
+        auth_scope_value = auth_scope.value if isinstance(auth_scope, AuthScope) else auth_scope
+        if auth_scope_value not in (0, 1):
+            raise ValidationError(
+                "auth_scope 只能是 AuthScope.PRIVATE(0) 或 AuthScope.PUBLIC(1)",
+                i18n_key='error.workspace.auth_scope_invalid'
+            )
 
-        if auth_scope is not None:
-            # 支持 AuthScope 枚举和 int 类型
-            auth_scope_value = auth_scope.value if isinstance(auth_scope, AuthScope) else auth_scope
-            if auth_scope_value not in (0, 1):
-                raise ValidationError(
-                    "auth_scope 只能是 AuthScope.PRIVATE(0) 或 AuthScope.PUBLIC(1)",
-                    i18n_key='error.workspace.auth_scope_invalid'
-                )
-            payload["auth_scope"] = auth_scope_value
+        if description is not None and len(description) > 200:
+            raise ValidationError(
+                "工作空间描述不能超过 200 个字符",
+                i18n_key='error.workspace.description_too_long',
+                max_length=200
+            )
+
+        if callback_retry_time is not None and (callback_retry_time < 1 or callback_retry_time > 3):
+            raise ValidationError(
+                "回调重试次数必须在 1-3 之间",
+                i18n_key='error.workspace.callback_retry_time_invalid'
+            )
+
+        payload = {
+            "workspace_id": workspace_id,
+            "name": name,
+            "auth_scope": auth_scope_value
+        }
+
+        if description is not None:
+            payload["description"] = description
+
+        if callback_url is not None:
+            payload["callback_url"] = callback_url
+
+        if callback_retry_time is not None:
+            payload["callback_retry_time"] = callback_retry_time
 
         payload.update(kwargs)
 

@@ -1,7 +1,7 @@
 """
 文件处理资源类
 """
-from typing import Optional, List, Dict, Any, Iterator
+from typing import Optional, List, Dict, Any, Iterator, Union
 from .base import BaseResource
 from ..models.file import (
     FileUploadResponse,
@@ -10,6 +10,7 @@ from ..models.file import (
     FileDeleteResponse
 )
 from .._constants import DEFAULT_PAGE, MAX_PAGE_SIZE, API_PREFIX
+from ..exceptions import ValidationError
 
 
 class FileResource(BaseResource):
@@ -23,7 +24,8 @@ class FileResource(BaseResource):
         self,
         workspace_id: str,
         category: str,
-        file_path: str,
+        file_path: Optional[str] = None,
+        file_urls: Optional[List[str]] = None,
         batch_number: Optional[str] = None,
         auto_verify_vat: Optional[bool] = None,
         split_flag: Optional[bool] = None,
@@ -38,10 +40,15 @@ class FileResource(BaseResource):
         """
         上传文件（异步）
 
+        支持两种上传方式：
+        1. 本地文件上传（multipart/form-data）：传入 file_path
+        2. URL 上传（application/json）：传入 file_urls
+
         Args:
             workspace_id: 空间ID
             category: 文件类别
-            file_path: 文件路径
+            file_path: 本地文件路径（可选，与 file_urls 二选一）
+            file_urls: 文件URL列表（可选，与 file_path 二选一，最多10个）
             batch_number: 批次编号（可选）
             auto_verify_vat: 是否自动核验增值税发票
             split_flag: 是否启用文档拆分
@@ -55,7 +62,52 @@ class FileResource(BaseResource):
 
         Returns:
             FileUploadResponse: 上传响应
+
+        Raises:
+            ValidationError: 参数校验失败
+
+        Examples:
+            >>> # 方式1：上传本地文件
+            >>> response = client.file.upload(
+            ...     workspace_id="123",
+            ...     category="发票",
+            ...     file_path="/path/to/invoice.pdf"
+            ... )
+            >>>
+            >>> # 方式2：通过URL上传
+            >>> response = client.file.upload(
+            ...     workspace_id="123",
+            ...     category="发票",
+            ...     file_urls=["https://example.com/invoice.pdf"]
+            ... )
         """
+        # 参数校验：file_path 和 file_urls 必须二选一
+        if file_path is None and file_urls is None:
+            raise ValidationError(
+                "file_path 和 file_urls 必须提供其中之一",
+                i18n_key='error.file.upload_source_required'
+            )
+
+        if file_path is not None and file_urls is not None:
+            raise ValidationError(
+                "file_path 和 file_urls 不能同时提供",
+                i18n_key='error.file.upload_source_conflict'
+            )
+
+        # 校验 file_urls
+        if file_urls is not None:
+            if not file_urls:
+                raise ValidationError(
+                    "file_urls 不能为空列表",
+                    i18n_key='error.file.urls_empty'
+                )
+            if len(file_urls) > 10:
+                raise ValidationError(
+                    "file_urls 最多支持 10 个 URL",
+                    i18n_key='error.file.urls_too_many',
+                    max_count=10
+                )
+
         params = {
             "workspace_id": workspace_id,
             "category": category,
@@ -83,13 +135,28 @@ class FileResource(BaseResource):
         if parser_table_text_split_mode is not None:
             params["parser_table_text_split_mode"] = parser_table_text_split_mode
 
-        # 上传文件
-        with open(file_path, 'rb') as f:
-            files = {'file': f}
+        # 根据上传方式选择不同的请求方式
+        if file_urls is not None:
+            # 方式2：通过 URL 上传（application/json）
             response = self.http_client.post(
                 f"{API_PREFIX}/file/upload",
                 params=params,
-                files=files
+                json_data={"urls": file_urls}
+            )
+        elif file_path is not None:
+            # 方式1：本地文件上传（multipart/form-data）
+            with open(file_path, 'rb') as f:
+                files = {'file': f}
+                response = self.http_client.post(
+                    f"{API_PREFIX}/file/upload",
+                    params=params,
+                    files=files
+                )
+        else:
+            # 这种情况不应该发生，因为前面已经校验过
+            raise ValidationError(
+                "file_path 和 file_urls 必须提供其中之一",
+                i18n_key='error.file.upload_source_required'
             )
 
         return FileUploadResponse(**response['result'])
@@ -98,7 +165,8 @@ class FileResource(BaseResource):
         self,
         workspace_id: str,
         category: str,
-        file_path: str,
+        file_path: Optional[str] = None,
+        file_urls: Optional[List[str]] = None,
         batch_number: Optional[str] = None,
         auto_verify_vat: Optional[bool] = None,
         split_flag: Optional[bool] = None,
@@ -114,10 +182,15 @@ class FileResource(BaseResource):
         """
         同步上传文件（等待处理完成）
 
+        支持两种上传方式：
+        1. 本地文件上传（multipart/form-data）：传入 file_path
+        2. URL 上传（application/json）：传入 file_urls
+
         Args:
             workspace_id: 空间ID
             category: 文件类别
-            file_path: 文件路径
+            file_path: 本地文件路径（可选，与 file_urls 二选一）
+            file_urls: 文件URL列表（可选，与 file_path 二选一，最多10个）
             batch_number: 批次编号（可选）
             auto_verify_vat: 是否自动核验增值税发票
             split_flag: 是否启用文档拆分
@@ -132,7 +205,52 @@ class FileResource(BaseResource):
 
         Returns:
             FileFetchResponse: 处理结果
+
+        Raises:
+            ValidationError: 参数校验失败
+
+        Examples:
+            >>> # 方式1：上传本地文件并等待处理
+            >>> result = client.file.upload_sync(
+            ...     workspace_id="123",
+            ...     category="发票",
+            ...     file_path="/path/to/invoice.pdf"
+            ... )
+            >>>
+            >>> # 方式2：通过URL上传并等待处理
+            >>> result = client.file.upload_sync(
+            ...     workspace_id="123",
+            ...     category="发票",
+            ...     file_urls=["https://example.com/invoice.pdf"]
+            ... )
         """
+        # 参数校验：file_path 和 file_urls 必须二选一
+        if file_path is None and file_urls is None:
+            raise ValidationError(
+                "file_path 和 file_urls 必须提供其中之一",
+                i18n_key='error.file.upload_source_required'
+            )
+
+        if file_path is not None and file_urls is not None:
+            raise ValidationError(
+                "file_path 和 file_urls 不能同时提供",
+                i18n_key='error.file.upload_source_conflict'
+            )
+
+        # 校验 file_urls
+        if file_urls is not None:
+            if not file_urls:
+                raise ValidationError(
+                    "file_urls 不能为空列表",
+                    i18n_key='error.file.urls_empty'
+                )
+            if len(file_urls) > 10:
+                raise ValidationError(
+                    "file_urls 最多支持 10 个 URL",
+                    i18n_key='error.file.urls_too_many',
+                    max_count=10
+                )
+
         params = {
             "workspace_id": workspace_id,
             "category": category,
@@ -162,13 +280,28 @@ class FileResource(BaseResource):
         if with_task_detail_url is not None:
             params["with_task_detail_url"] = with_task_detail_url
 
-        # 同步上传文件
-        with open(file_path, 'rb') as f:
-            files = {'file': f}
+        # 根据上传方式选择不同的请求方式
+        if file_urls is not None:
+            # 方式2：通过 URL 上传（application/json）
             response = self.http_client.post(
                 f"{API_PREFIX}/file/upload/sync",
                 params=params,
-                files=files
+                json_data={"urls": file_urls}
+            )
+        elif file_path is not None:
+            # 方式1：本地文件上传（multipart/form-data）
+            with open(file_path, 'rb') as f:
+                files = {'file': f}
+                response = self.http_client.post(
+                    f"{API_PREFIX}/file/upload/sync",
+                    params=params,
+                    files=files
+                )
+        else:
+            # 这种情况不应该发生，因为前面已经校验过
+            raise ValidationError(
+                "file_path 和 file_urls 必须提供其中之一",
+                i18n_key='error.file.upload_source_required'
             )
 
         return FileFetchResponse(**response['result'])
@@ -411,11 +544,37 @@ class FileResource(BaseResource):
         Args:
             workspace_id: 空间ID
             task_id: 任务ID
-            fields: 字段列表，每项包含 name 和 description
-            tables: 表格列表，每项包含 name 和 fields
+            fields: 字段列表，每项包含 key（字段名称）和 prompt（字段提示）
+            tables: 表格列表，每项包含 name（表格名称）和 fields（字段列表）
 
         Returns:
             FileFetchResponse: 抽取结果
+
+        Examples:
+            >>> # 抽取额外的字段
+            >>> result = client.file.extract_fields(
+            ...     workspace_id="123",
+            ...     task_id="456",
+            ...     fields=[
+            ...         {"key": "发票代码", "prompt": "只保留年的部分"},
+            ...         {"key": "发票号码"}
+            ...     ]
+            ... )
+            >>>
+            >>> # 抽取表格字段
+            >>> result = client.file.extract_fields(
+            ...     workspace_id="123",
+            ...     task_id="456",
+            ...     tables=[
+            ...         {
+            ...             "name": "货物明细",
+            ...             "fields": [
+            ...                 {"key": "货物名称"},
+            ...                 {"key": "数量"}
+            ...             ]
+            ...         }
+            ...     ]
+            ... )
         """
         payload = {
             "workspace_id": workspace_id,

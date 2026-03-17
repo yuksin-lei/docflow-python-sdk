@@ -3,6 +3,9 @@
 """
 import pytest
 from unittest.mock import patch
+
+from unicodedata import category
+
 from docflow import DocflowClient
 from docflow.exceptions import ValidationError
 
@@ -201,11 +204,9 @@ def test_repo_get_success(client, mock_workspace_id):
                         {
                             "rule_id": "1111111111111111111",
                             "name": "金额范围检查",
-                            "rule_type": "range_check",
-                            "config": {"min": 0, "max": 100000},
                             "prompt": "检查金额是否在合理范围内",
                             "category_ids": ["100"],
-                            "risk_level": 1
+                            "risk_level": 10
                         }
                     ]
                 }
@@ -242,7 +243,7 @@ def test_repo_update_success(client, mock_workspace_id):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         client.review.update_repo(
             workspace_id=mock_workspace_id,
-            repo_id="1234567890123456789",
+            repo_id=31415926,
             name="新的规则库名称"
         )
 
@@ -250,7 +251,7 @@ def test_repo_update_success(client, mock_workspace_id):
         call_args = mock_post.call_args
         json_data = call_args[1]['json_data']
         assert json_data['workspace_id'] == mock_workspace_id
-        assert json_data['repo_id'] == "1234567890123456789"
+        assert json_data['repo_id'] == 31415926
         assert json_data['name'] == "新的规则库名称"
 
 
@@ -267,14 +268,14 @@ def test_repo_delete_success(client, mock_workspace_id):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         client.review.delete_repo(
             workspace_id=mock_workspace_id,
-            repo_ids=["1234567890123456789", "9876543210987654321"]
+            repo_ids=[31415926, 27182818]
         )
 
         # 验证调用参数
         call_args = mock_post.call_args
         json_data = call_args[1]['json_data']
         assert json_data['workspace_id'] == mock_workspace_id
-        assert json_data['repo_ids'] == ["1234567890123456789", "9876543210987654321"]
+        assert json_data['repo_ids'] == [31415926, 27182818]
 
 
 # ==================== 规则组管理测试 ====================
@@ -306,7 +307,7 @@ def test_group_create_success(client, mock_workspace_id):
         call_args = mock_post.call_args
         json_data = call_args[1]['json_data']
         assert json_data['workspace_id'] == mock_workspace_id
-        assert json_data['repo_id'] == "9876543210987654321"
+        assert json_data['repo_id'] == 31415926
         assert json_data['name'] == "金额校验组"
 
 
@@ -375,10 +376,12 @@ def test_rule_create_success(client, mock_workspace_id):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         result = client.review.create_rule(
             workspace_id=mock_workspace_id,
+            repo_id=31415926,
             group_id="9876543210987654321",
             name="金额范围检查",
-            rule_type="range_check",
-            config={"min": 0, "max": 100000}
+            prompt="请检查金额是否在合理范围内",
+            category_ids=["1234567890"],
+            risk_level=10
         )
 
         # 验证返回结果
@@ -389,10 +392,12 @@ def test_rule_create_success(client, mock_workspace_id):
         call_args = mock_post.call_args
         json_data = call_args[1]['json_data']
         assert json_data['workspace_id'] == mock_workspace_id
+        assert json_data['repo_id'] == 31415926
         assert json_data['group_id'] == "9876543210987654321"
         assert json_data['name'] == "金额范围检查"
-        assert json_data['rule_type'] == "range_check"
-        assert json_data['config'] == {"min": 0, "max": 100000}
+        assert json_data['prompt'] == "请检查金额是否在合理范围内"
+        assert json_data['category_ids'] == ["1234567890"]
+        assert json_data['risk_level'] == 10
 
 
 def test_rule_update_success(client, mock_workspace_id):
@@ -410,7 +415,8 @@ def test_rule_update_success(client, mock_workspace_id):
             workspace_id=mock_workspace_id,
             rule_id="1234567890123456789",
             name="新的规则名称",
-            config={"min": 100, "max": 200000}
+            prompt="更新后的提示词",
+            risk_level=20
         )
 
         # 验证调用参数
@@ -419,7 +425,8 @@ def test_rule_update_success(client, mock_workspace_id):
         assert json_data['workspace_id'] == mock_workspace_id
         assert json_data['rule_id'] == "1234567890123456789"
         assert json_data['name'] == "新的规则名称"
-        assert json_data['config'] == {"min": 100, "max": 200000}
+        assert json_data['prompt'] == "更新后的提示词"
+        assert json_data['risk_level'] == 20
 
 
 def test_rule_delete_success(client, mock_workspace_id):

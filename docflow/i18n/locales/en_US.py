@@ -40,6 +40,7 @@ TRANSLATIONS = {
     'error.workspace.delete_list_empty': 'workspace_ids cannot be empty',
     'error.workspace.page_invalid': 'Page number must be greater than or equal to 1',
     'error.workspace.page_size_invalid': 'Page size must be between 1 and 100',
+    'error.workspace.callback_retry_time_invalid': 'Callback retry time must be between 1 and 3',
 
     # Category related
     'error.category.name_invalid': 'Category name cannot be empty and must not exceed 50 characters',
@@ -76,6 +77,12 @@ TRANSLATIONS = {
     'error.review_task.repo_id_invalid': 'Review rule repository ID must be a numeric string',
     'error.review_task.rule_id_empty': 'Review rule ID cannot be empty',
     'error.review_task.rule_id_invalid': 'Review rule ID must be a numeric string',
+
+    # File upload related
+    'error.file.upload_source_required': 'Either file_path or file_urls must be provided',
+    'error.file.upload_source_conflict': 'file_path and file_urls cannot be provided at the same time',
+    'error.file.urls_empty': 'file_urls cannot be an empty list',
+    'error.file.urls_too_many': 'file_urls supports a maximum of {max_count} URLs',
 
     # API errors
     'error.api.request_failed': 'API request failed',

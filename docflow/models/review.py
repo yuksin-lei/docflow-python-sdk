@@ -11,8 +11,6 @@ class ReviewRule:
     """审核规则"""
     rule_id: str
     name: str
-    rule_type: Optional[str] = None
-    config: Optional[Dict[str, Any]] = None
     prompt: Optional[str] = None
     category_ids: Optional[List[str]] = None
     risk_level: Optional[int] = None

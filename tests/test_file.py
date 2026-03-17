@@ -129,6 +129,168 @@ def test_file_upload_with_optional_params(client, mock_workspace_id):
             assert call_args[1]['params']['split_flag'] is False
 
 
+def test_file_upload_by_url_success(client, mock_workspace_id):
+    """测试通过URL上传文件成功"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "batch_number": "202412190002",
+            "files": [
+                {
+                    "id": "file_url_001",
+                    "task_id": "task_url_001",
+                    "name": "invoice.pdf",
+                    "format": "pdf"
+                }
+            ]
+        }
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        result = client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=["https://example.com/invoice.pdf"]
+        )
+
+        # 验证返回结果
+        assert result is not None
+        assert result.batch_number == "202412190002"
+        assert len(result.files) == 1
+        assert result.files[0].id == "file_url_001"
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        assert 'json_data' in call_args[1]
+        assert call_args[1]['json_data']['urls'] == ["https://example.com/invoice.pdf"]
+        assert 'files' not in call_args[1]
+
+
+def test_file_upload_by_multiple_urls(client, mock_workspace_id):
+    """测试通过多个URL上传文件"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "batch_number": "batch_multi",
+            "files": [
+                {
+                    "id": f"file_{i}",
+                    "task_id": f"task_{i}",
+                    "name": f"file_{i}.pdf",
+                    "format": "pdf"
+                } for i in range(1, 4)
+            ]
+        }
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        result = client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=[
+                "https://example.com/file1.pdf",
+                "https://example.com/file2.pdf",
+                "https://example.com/file3.pdf"
+            ]
+        )
+
+        # 验证返回结果
+        assert result is not None
+        assert len(result.files) == 3
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        assert len(call_args[1]['json_data']['urls']) == 3
+
+
+def test_file_upload_validation_no_source(client, mock_workspace_id):
+    """测试上传文件参数校验：未提供 file_path 或 file_urls"""
+    with pytest.raises(ValidationError, match="file_path 和 file_urls 必须提供其中之一"):
+        client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice"
+        )
+
+
+def test_file_upload_validation_both_sources(client, mock_workspace_id):
+    """测试上传文件参数校验：同时提供 file_path 和 file_urls"""
+    with pytest.raises(ValidationError, match="file_path 和 file_urls 不能同时提供"):
+        client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_path="/fake/path/file.pdf",
+            file_urls=["https://example.com/file.pdf"]
+        )
+
+
+def test_file_upload_validation_empty_urls(client, mock_workspace_id):
+    """测试上传文件参数校验：file_urls 为空列表"""
+    with pytest.raises(ValidationError, match="file_urls 不能为空列表"):
+        client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=[]
+        )
+
+
+def test_file_upload_validation_too_many_urls(client, mock_workspace_id):
+    """测试上传文件参数校验：file_urls 超过 10 个"""
+    with pytest.raises(ValidationError, match="file_urls 最多支持 10 个 URL"):
+        client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=[f"https://example.com/file{i}.pdf" for i in range(1, 12)]
+        )
+
+
+def test_file_upload_by_url_with_optional_params(client, mock_workspace_id):
+    """测试通过URL上传文件（带可选参数）"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "batch_number": "batch_with_params",
+            "files": [
+                {
+                    "id": "file_001",
+                    "task_id": "task_001",
+                    "name": "invoice.pdf",
+                    "format": "pdf"
+                }
+            ]
+        }
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        result = client.file.upload(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=["https://example.com/invoice.pdf"],
+            batch_number="batch_with_params",
+            auto_verify_vat=True,
+            split_flag=False
+        )
+
+        # 验证返回结果
+        assert result is not None
+        assert result.batch_number == "batch_with_params"
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        assert call_args[1]['json_data']['urls'] == ["https://example.com/invoice.pdf"]
+        assert call_args[1]['params']['batch_number'] == "batch_with_params"
+        assert call_args[1]['params']['auto_verify_vat'] is True
+        assert call_args[1]['params']['split_flag'] is False
+
+
 # ==================== upload_sync 测试 ====================
 
 def test_file_upload_sync_success(client, mock_workspace_id):
@@ -170,6 +332,115 @@ def test_file_upload_sync_success(client, mock_workspace_id):
             assert len(result.files) == 1
             assert result.files[0].id == "file_67890"
             assert result.files[0].recognition_status == "success"
+
+
+def test_file_upload_sync_by_url_success(client, mock_workspace_id):
+    """测试通过URL同步上传文件成功"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "total": 1,
+            "page": 1,
+            "page_size": 1000,
+            "files": [
+                {
+                    "id": "file_url_sync_001",
+                    "task_id": "task_url_sync_001",
+                    "name": "invoice.pdf",
+                    "format": "pdf",
+                    "category": "invoice",
+                    "recognition_status": "success"
+                }
+            ]
+        }
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        result = client.file.upload_sync(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=["https://example.com/invoice.pdf"]
+        )
+
+        # 验证返回结果
+        assert result is not None
+        assert result.total == 1
+        assert len(result.files) == 1
+        assert result.files[0].id == "file_url_sync_001"
+        assert result.files[0].recognition_status == "success"
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        assert 'json_data' in call_args[1]
+        assert call_args[1]['json_data']['urls'] == ["https://example.com/invoice.pdf"]
+        assert 'files' not in call_args[1]
+
+
+def test_file_upload_sync_validation_no_source(client, mock_workspace_id):
+    """测试同步上传文件参数校验：未提供 file_path 或 file_urls"""
+    with pytest.raises(ValidationError, match="file_path 和 file_urls 必须提供其中之一"):
+        client.file.upload_sync(
+            workspace_id=mock_workspace_id,
+            category="invoice"
+        )
+
+
+def test_file_upload_sync_validation_both_sources(client, mock_workspace_id):
+    """测试同步上传文件参数校验：同时提供 file_path 和 file_urls"""
+    with pytest.raises(ValidationError, match="file_path 和 file_urls 不能同时提供"):
+        client.file.upload_sync(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_path="/fake/path/file.pdf",
+            file_urls=["https://example.com/file.pdf"]
+        )
+
+
+def test_file_upload_sync_by_url_with_optional_params(client, mock_workspace_id):
+    """测试通过URL同步上传文件（带可选参数）"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "total": 1,
+            "page": 1,
+            "page_size": 1000,
+            "files": [
+                {
+                    "id": "file_001",
+                    "task_id": "task_001",
+                    "name": "invoice.pdf",
+                    "format": "pdf",
+                    "category": "invoice",
+                    "recognition_status": "success"
+                }
+            ]
+        }
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        result = client.file.upload_sync(
+            workspace_id=mock_workspace_id,
+            category="invoice",
+            file_urls=["https://example.com/invoice.pdf"],
+            batch_number="batch_sync",
+            with_task_detail_url=True
+        )
+
+        # 验证返回结果
+        assert result is not None
+        assert result.total == 1
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        assert call_args[1]['json_data']['urls'] == ["https://example.com/invoice.pdf"]
+        assert call_args[1]['params']['batch_number'] == "batch_sync"
+        assert call_args[1]['params']['with_task_detail_url'] is True
 
 
 # ==================== fetch 测试 ====================

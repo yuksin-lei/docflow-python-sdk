@@ -242,34 +242,48 @@ class ReviewResource(BaseResource):
     def create_rule(
         self,
         workspace_id: str,
-        group_id: str,
-        name: str,
-        rule_type: str,
-        config: Dict[str, Any],
-        **kwargs
+        repo_id: int,
+        group_id: Optional[str] = None,
+        name: Optional[str] = None,
+        prompt: Optional[str] = None,
+        category_ids: Optional[List[str]] = None,
+        risk_level: Optional[int] = None,
+        referenced_fields: Optional[List[Dict[str, Any]]] = None,
     ) -> ReviewRuleCreateResponse:
         """
         创建审核规则
 
         Args:
             workspace_id: 空间ID
-            group_id: 规则组ID
-            name: 规则名称
-            rule_type: 规则类型
-            config: 规则配置
-            **kwargs: 其他规则属性
+            repo_id: 审核规则库ID
+            group_id: 规则组ID（可选）
+            name: 规则名称（可选）
+            prompt: 规则提示词（可选）
+            category_ids: 分类ID列表（可选）
+            risk_level: 风险等级，10:高风险，20:中风险，30:低风险（可选）
+            referenced_fields: 引用字段列表（可选）
 
         Returns:
             ReviewRuleCreateResponse: 创建响应
         """
         payload = {
             "workspace_id": workspace_id,
-            "group_id": group_id,
-            "name": name,
-            "rule_type": rule_type,
-            "config": config,
-            **kwargs
+            "repo_id": repo_id,
         }
+
+        # 添加可选参数
+        if group_id is not None:
+            payload["group_id"] = group_id
+        if name is not None:
+            payload["name"] = name
+        if prompt is not None:
+            payload["prompt"] = prompt
+        if category_ids is not None:
+            payload["category_ids"] = category_ids
+        if risk_level is not None:
+            payload["risk_level"] = risk_level
+        if referenced_fields is not None:
+            payload["referenced_fields"] = referenced_fields
 
         response = self.http_client.post(
             f"{API_PREFIX}/review/rule/create",
@@ -282,10 +296,12 @@ class ReviewResource(BaseResource):
         self,
         workspace_id: str,
         rule_id: str,
+        group_id: Optional[str] = None,
         name: Optional[str] = None,
-        rule_type: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-        **kwargs
+        prompt: Optional[str] = None,
+        category_ids: Optional[List[str]] = None,
+        risk_level: Optional[int] = None,
+        referenced_fields: Optional[List[Dict[str, Any]]] = None,
     ) -> None:
         """
         更新审核规则
@@ -293,24 +309,31 @@ class ReviewResource(BaseResource):
         Args:
             workspace_id: 空间ID
             rule_id: 规则ID
-            name: 规则名称
-            rule_type: 规则类型
-            config: 规则配置
-            **kwargs: 其他规则属性
+            group_id: 规则组ID（可选）
+            name: 规则名称（可选）
+            prompt: 规则提示词（可选）
+            category_ids: 分类ID列表（可选）
+            risk_level: 风险等级，10:高风险，20:中风险，30:低风险（可选）
+            referenced_fields: 引用字段列表（可选）
         """
         payload = {
             "workspace_id": workspace_id,
             "rule_id": rule_id
         }
 
+        # 添加可选参数
+        if group_id is not None:
+            payload["group_id"] = group_id
         if name is not None:
             payload["name"] = name
-        if rule_type is not None:
-            payload["rule_type"] = rule_type
-        if config is not None:
-            payload["config"] = config
-
-        payload.update(kwargs)
+        if prompt is not None:
+            payload["prompt"] = prompt
+        if category_ids is not None:
+            payload["category_ids"] = category_ids
+        if risk_level is not None:
+            payload["risk_level"] = risk_level
+        if referenced_fields is not None:
+            payload["referenced_fields"] = referenced_fields
 
         self.http_client.post(
             f"{API_PREFIX}/review/rule/update",

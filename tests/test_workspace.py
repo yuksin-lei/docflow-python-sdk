@@ -12,11 +12,15 @@ def test_create_workspace_validation(client):
     """测试创建工作空间参数校验"""
     # 测试空名称
     with pytest.raises(ValidationError, match="工作空间名称不能为空"):
-        client.workspace.create(enterprise_id=12345, name="")
+        client.workspace.create(enterprise_id=12345, name="", auth_scope=0)
 
     # 测试名称过长
     with pytest.raises(ValidationError, match="工作空间名称不能超过 50 个字符"):
-        client.workspace.create(enterprise_id=12345, name="a" * 51)
+        client.workspace.create(enterprise_id=12345, name="a" * 51, auth_scope=0)
+
+    # 测试描述过长
+    with pytest.raises(ValidationError, match="工作空间描述不能超过 200 个字符"):
+        client.workspace.create(enterprise_id=12345, name="测试", auth_scope=0, description="a" * 201)
 
     # 测试无效的 auth_scope
     with pytest.raises(ValidationError, match="auth_scope 只能是"):
@@ -54,15 +58,30 @@ def test_update_workspace_validation(client):
     """测试更新工作空间参数校验"""
     # 测试空 ID
     with pytest.raises(ValidationError, match="工作空间 ID 不能为空"):
-        client.workspace.update(workspace_id="", name="测试")
+        client.workspace.update(workspace_id="", name="测试", auth_scope=0)
 
     # 测试空名称
     with pytest.raises(ValidationError, match="工作空间名称不能为空"):
-        client.workspace.update(workspace_id="123", name="  ")
+        client.workspace.update(workspace_id="123", name="  ", auth_scope=0)
+
+    # 测试名称过长
+    with pytest.raises(ValidationError, match="工作空间名称不能超过 50 个字符"):
+        client.workspace.update(workspace_id="123", name="a" * 51, auth_scope=0)
 
     # 测试无效的 auth_scope
     with pytest.raises(ValidationError, match="auth_scope 只能是"):
-        client.workspace.update(workspace_id="123", auth_scope=2)
+        client.workspace.update(workspace_id="123", name="测试", auth_scope=2)
+
+    # 测试描述过长
+    with pytest.raises(ValidationError, match="工作空间描述不能超过 200 个字符"):
+        client.workspace.update(workspace_id="123", name="测试", auth_scope=0, description="a" * 201)
+
+    # 测试无效的 callback_retry_time
+    with pytest.raises(ValidationError, match="回调重试次数必须在 1-3 之间"):
+        client.workspace.update(workspace_id="123", name="测试", auth_scope=0, callback_retry_time=4)
+
+    with pytest.raises(ValidationError, match="回调重试次数必须在 1-3 之间"):
+        client.workspace.update(workspace_id="123", name="测试", auth_scope=0, callback_retry_time=0)
 
 
 def test_delete_workspace_validation(client):
@@ -94,7 +113,8 @@ def test_workspace_create_success(client):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         result = client.workspace.create(
             enterprise_id=12345,
-            name="测试工作空间"
+            name="测试工作空间",
+            auth_scope=AuthScope.PRIVATE
         )
 
         # 验证返回结果
@@ -106,6 +126,7 @@ def test_workspace_create_success(client):
         assert call_args[0][0] == "/app-api/sip/platform/v2/workspace/create"
         assert call_args[1]['json_data']['enterprise_id'] == 12345
         assert call_args[1]['json_data']['name'] == "测试工作空间"
+        assert call_args[1]['json_data']['auth_scope'] == 0
 
 
 def test_workspace_create_with_optional_params(client):
@@ -302,7 +323,8 @@ def test_workspace_update_success(client):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         client.workspace.update(
             workspace_id="1234567890123456789",
-            name="新的工作空间名称"
+            name="新的工作空间名称",
+            auth_scope=AuthScope.PRIVATE
         )
 
         # 验证调用参数
@@ -311,6 +333,7 @@ def test_workspace_update_success(client):
         json_data = call_args[1]['json_data']
         assert json_data['workspace_id'] == "1234567890123456789"
         assert json_data['name'] == "新的工作空间名称"
+        assert json_data['auth_scope'] == 0
 
 
 def test_workspace_update_with_auth_scope(client):
@@ -351,13 +374,47 @@ def test_workspace_update_with_int_auth_scope(client):
     with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
         client.workspace.update(
             workspace_id="1234567890123456789",
+            name="测试工作空间",
             auth_scope=0
         )
 
         # 验证调用参数
         call_args = mock_post.call_args
         json_data = call_args[1]['json_data']
+        assert json_data['workspace_id'] == "1234567890123456789"
+        assert json_data['name'] == "测试工作空间"
         assert json_data['auth_scope'] == 0
+
+
+def test_workspace_update_with_optional_params(client):
+    """测试更新工作空间（带可选参数）"""
+    # Mock API 响应
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {}
+    }
+
+    # Mock HTTP 请求
+    with patch.object(client.http_client, 'post', return_value=mock_response) as mock_post:
+        client.workspace.update(
+            workspace_id="1234567890123456789",
+            name="更新后的工作空间",
+            auth_scope=AuthScope.PUBLIC,
+            description="更新后的描述",
+            callback_url="https://example.com/callback",
+            callback_retry_time=3
+        )
+
+        # 验证调用参数
+        call_args = mock_post.call_args
+        json_data = call_args[1]['json_data']
+        assert json_data['workspace_id'] == "1234567890123456789"
+        assert json_data['name'] == "更新后的工作空间"
+        assert json_data['auth_scope'] == 1
+        assert json_data['description'] == "更新后的描述"
+        assert json_data['callback_url'] == "https://example.com/callback"
+        assert json_data['callback_retry_time'] == 3
 
 
 def test_workspace_delete_success(client):
