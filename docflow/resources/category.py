@@ -34,7 +34,7 @@ class CategoryResource(BaseResource):
         >>> category = client.category.create(
         ...     workspace_id="123",
         ...     name="发票类别",
-        ...     extract_model="llm",
+        ...     extract_model="Model 1",
         ...     sample_files=["/path/to/sample.pdf"],
         ...     fields=[{"name": "发票号码"}]
         ... )
@@ -65,9 +65,7 @@ class CategoryResource(BaseResource):
         extract_model: Union[ExtractModel, str],
         sample_files: List[Union[str, BinaryIO]],
         fields: List[Dict[str, Any]],
-        tables: Optional[List[Dict[str, Any]]] = None,
         category_prompt: Optional[str] = None,
-        description: Optional[str] = None,
     ) -> CategoryCreateResponse:
         """
         创建文件类别
@@ -75,19 +73,14 @@ class CategoryResource(BaseResource):
         Args:
             workspace_id: 工作空间 ID
             name: 类别名称（最大 50 字符）
-            extract_model: 提取模型（ExtractModel.LLM 或 ExtractModel.VLM）
+            extract_model: 提取模型（ExtractModel.Model_1/Model_2/Model_3 或字符串 "Model 1"/"Model 2"/"Model 3"）
             sample_files: 样本文件列表（支持文件路径、文件对象）
             fields: 字段配置列表，例如:
                 [
                     {"name": "发票号码", "description": "发票唯一标识"},
                     {"name": "金额", "description": "发票总金额"}
                 ]
-            tables: 表格配置列表（可选），例如:
-                [
-                    {"name": "商品明细表", "description": "商品信息"}
-                ]
             category_prompt: 类别提示（最大 150 字符，可选）
-            description: 类别描述（可选）
 
         Returns:
             CategoryCreateResponse: 包含新创建的类别 ID
@@ -103,7 +96,7 @@ class CategoryResource(BaseResource):
             >>> category = client.category.create(
             ...     workspace_id="123",
             ...     name="发票类别",
-            ...     extract_model=ExtractModel.LLM,
+            ...     extract_model=ExtractModel.Model_1,
             ...     sample_files=[
             ...         "/path/to/sample1.pdf",
             ...         open("/path/to/sample2.pdf", "rb")
@@ -118,9 +111,6 @@ class CategoryResource(BaseResource):
             ...             }
             ...         }
             ...     ],
-            ...     tables=[
-            ...         {"name": "商品明细表"}
-            ...     ],
             ...     category_prompt="这是发票类别"
             ... )
             >>>
@@ -128,7 +118,7 @@ class CategoryResource(BaseResource):
             >>> category = client.category.create(
             ...     workspace_id="123",
             ...     name="发票类别",
-            ...     extract_model="llm",
+            ...     extract_model="Model 1",
             ...     sample_files=["/path/to/sample.pdf"],
             ...     fields=[{"name": "发票号码"}]
             ... )
@@ -145,9 +135,9 @@ class CategoryResource(BaseResource):
 
         # 支持 ExtractModel 枚举和 str 类型
         extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-        if extract_model_value not in ("llm", "vlm"):
+        if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
             raise ValidationError(
-                "extract_model 必须是 ExtractModel.LLM('llm') 或 ExtractModel.VLM('vlm')",
+                "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
                 i18n_key='error.category.extract_model_invalid'
             )
 
@@ -177,14 +167,8 @@ class CategoryResource(BaseResource):
             "fields": json.dumps(fields, ensure_ascii=False),
         }
 
-        if tables:
-            data["tables"] = json.dumps(tables, ensure_ascii=False)
-
         if category_prompt:
             data["category_prompt"] = category_prompt
-
-        if description:
-            data["description"] = description
 
         # 准备文件
         files = FileHandler.prepare_files(sample_files, field_name="sample_files")
@@ -276,8 +260,8 @@ class CategoryResource(BaseResource):
         category_id: str,
         name: Optional[str] = None,
         category_prompt: Optional[str] = None,
-        description: Optional[str] = None,
         enabled: Optional[Union[EnabledFlag, int]] = None,
+        extract_model: Optional[Union[ExtractModel, str]] = None,
         **kwargs,
     ) -> None:
         """
@@ -288,27 +272,28 @@ class CategoryResource(BaseResource):
             category_id: 类别 ID
             name: 新的类别名称（可选）
             category_prompt: 新的类别提示（可选）
-            description: 新的描述（可选）
             enabled: 启用状态（EnabledFlag.DISABLED=0 或 EnabledFlag.ENABLED=1，可选）
+            extract_model: 提取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
             **kwargs: 其他要更新的字段
 
         Examples:
-            >>> from docflow import EnabledFlag
+            >>> from docflow import EnabledFlag, ExtractModel
             >>>
             >>> # 使用枚举（推荐）
             >>> client.category.update(
             ...     workspace_id="123",
             ...     category_id="456",
             ...     name="更新后的类别名称",
-            ...     description="新的描述",
-            ...     enabled=EnabledFlag.ENABLED
+            ...     category_prompt="新的提示",
+            ...     enabled=EnabledFlag.ENABLED,
+            ...     extract_model=ExtractModel.Model_2
             ... )
             >>>
-            >>> # 也支持直接使用数字
+            >>> # 也支持直接使用字符串
             >>> client.category.update(
             ...     workspace_id="123",
             ...     category_id="456",
-            ...     enabled=1
+            ...     extract_model="Model 1"
             ... )
         """
         # 参数校验
@@ -336,8 +321,15 @@ class CategoryResource(BaseResource):
                 )
             payload["category_prompt"] = category_prompt
 
-        if description is not None:
-            payload["description"] = description
+        if extract_model is not None:
+            # 支持 ExtractModel 枚举和 str 类型
+            extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
+            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+                raise ValidationError(
+                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    i18n_key='error.category.extract_model_invalid'
+                )
+            payload["extract_model"] = extract_model_value
 
         if enabled is not None:
             # 支持 EnabledFlag 枚举和 int 类型
@@ -528,6 +520,7 @@ class CategoryTableResource(BaseResource):
         name: str,
         prompt: Optional[str] = None,
         collect_from_multi_table: Optional[bool] = None,
+        extract_model: Optional[Union[ExtractModel, str]] = None,
         **kwargs,
     ) -> TableAddResponse:
         """
@@ -539,17 +532,20 @@ class CategoryTableResource(BaseResource):
             name: 表格名称
             prompt: 表格语义抽取提示词（可选，最大200字符）
             collect_from_multi_table: 多表合并（可选）
+            extract_model: 表格级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
             **kwargs: 其他表格配置参数
 
         Returns:
             TableAddResponse: 包含新创建的表格 ID
 
         Examples:
+            >>> from docflow import ExtractModel
             >>> table = client.category.tables.add(
             ...     workspace_id="123",
             ...     category_id="456",
             ...     name="商品明细表",
-            ...     prompt="请抽取每行的品名、数量和金额"
+            ...     prompt="请抽取每行的品名、数量和金额",
+            ...     extract_model=ExtractModel.Model_1
             ... )
             >>> print(table.table_id)
         """
@@ -575,6 +571,16 @@ class CategoryTableResource(BaseResource):
         if collect_from_multi_table is not None:
             payload["collect_from_multi_table"] = collect_from_multi_table
 
+        if extract_model is not None:
+            # 支持 ExtractModel 枚举和 str 类型
+            extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
+            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+                raise ValidationError(
+                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    i18n_key='error.table.extract_model_invalid'
+                )
+            payload["extract_model"] = extract_model_value
+
         payload.update(kwargs)
 
         response = self.http_client.post(
@@ -591,6 +597,7 @@ class CategoryTableResource(BaseResource):
         collect_from_multi_table: bool,
         name: Optional[str] = None,
         prompt: Optional[str] = None,
+        extract_model: Optional[Union[ExtractModel, str]] = None,
         **kwargs,
     ) -> None:
         """
@@ -603,15 +610,18 @@ class CategoryTableResource(BaseResource):
             collect_from_multi_table: 多表合并（必填）
             name: 新的表格名称（可选，最大50字符）
             prompt: 新的表格语义抽取提示词（可选，最大200字符）
+            extract_model: 表格级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
             **kwargs: 其他要更新的字段
 
         Examples:
+            >>> from docflow import ExtractModel
             >>> client.category.tables.update(
             ...     workspace_id="123",
             ...     category_id="456",
             ...     table_id="789",
             ...     collect_from_multi_table=True,
-            ...     name="更新后的表格名称"
+            ...     name="更新后的表格名称",
+            ...     extract_model=ExtractModel.Model_2
             ... )
         """
         # 参数校验
@@ -636,6 +646,16 @@ class CategoryTableResource(BaseResource):
 
         if prompt is not None:
             payload["prompt"] = prompt
+
+        if extract_model is not None:
+            # 支持 ExtractModel 枚举和 str 类型
+            extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
+            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+                raise ValidationError(
+                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    i18n_key='error.table.extract_model_invalid'
+                )
+            payload["extract_model"] = extract_model_value
 
         payload.update(kwargs)
 
@@ -742,6 +762,7 @@ class CategoryFieldResource(BaseResource):
         name: str,
         description: Optional[str] = None,
         table_id: Optional[str] = None,
+        extract_model: Optional[Union[ExtractModel, str]] = None,
         **kwargs,
     ) -> FieldAddResponse:
         """
@@ -753,6 +774,7 @@ class CategoryFieldResource(BaseResource):
             name: 字段名称
             description: 字段描述（可选）
             table_id: 字段所属表格id（可选）
+            extract_model: 字段级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选，仅支持普通字段）
             **kwargs: 其他字段配置参数，如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -771,14 +793,15 @@ class CategoryFieldResource(BaseResource):
             FieldAddResponse: 包含新创建的字段 ID
 
         Examples:
-            >>> from docflow import FieldType, MismatchAction
+            >>> from docflow import FieldType, MismatchAction, ExtractModel
             >>>
             >>> # 创建基础字段
             >>> field = client.category.fields.add(
             ...     workspace_id="123",
             ...     category_id="456",
             ...     name="发票号码",
-            ...     description="发票唯一标识"
+            ...     description="发票唯一标识",
+            ...     extract_model=ExtractModel.Model_1
             ... )
             >>>
             >>> # 创建带日期时间转换的字段
@@ -807,7 +830,8 @@ class CategoryFieldResource(BaseResource):
             ...         "mismatch_action": {
             ...             "mode": MismatchAction.WARNING.value
             ...         }
-            ...     }
+            ...     },
+            ...     extract_model=ExtractModel.Model_2
             ... )
         """
         # 参数校验
@@ -831,6 +855,16 @@ class CategoryFieldResource(BaseResource):
 
         if table_id:
             payload["table_id"] = table_id
+
+        if extract_model is not None:
+            # 支持 ExtractModel 枚举和 str 类型
+            extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
+            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+                raise ValidationError(
+                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    i18n_key='error.field.extract_model_invalid'
+                )
+            payload["extract_model"] = extract_model_value
 
         payload.update(kwargs)
 
@@ -887,6 +921,7 @@ class CategoryFieldResource(BaseResource):
         name: Optional[str] = None,
         description: Optional[str] = None,
         table_id: Optional[str] = None,
+        extract_model: Optional[Union[ExtractModel, str]] = None,
         **kwargs,
     ) -> None:
         """
@@ -899,6 +934,7 @@ class CategoryFieldResource(BaseResource):
             name: 新的字段名称（可选）
             description: 新的描述（可选）
             table_id: 字段所属表格id（可选）
+            extract_model: 字段级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
             **kwargs: 其他要更新的字段配置参数，如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -906,16 +942,17 @@ class CategoryFieldResource(BaseResource):
                 - transform_settings: 转换配置（字典）
 
         Examples:
+            >>> from docflow import FieldType, ExtractModel
             >>> # 更新字段基本信息
             >>> client.category.fields.update(
             ...     workspace_id="123",
             ...     category_id="456",
             ...     field_id="789",
-            ...     name="更新后的字段名"
+            ...     name="更新后的字段名",
+            ...     extract_model=ExtractModel.Model_2
             ... )
             >>>
             >>> # 更新字段转换配置
-            >>> from docflow import FieldType
             >>> client.category.fields.update(
             ...     workspace_id="123",
             ...     category_id="456",
@@ -950,6 +987,16 @@ class CategoryFieldResource(BaseResource):
 
         if table_id is not None:
             payload["table_id"] = table_id
+
+        if extract_model is not None:
+            # 支持 ExtractModel 枚举和 str 类型
+            extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
+            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+                raise ValidationError(
+                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    i18n_key='error.field.extract_model_invalid'
+                )
+            payload["extract_model"] = extract_model_value
 
         payload.update(kwargs)
 

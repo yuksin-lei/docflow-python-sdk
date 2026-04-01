@@ -9,13 +9,10 @@ from enum import Enum
 class ExtractModel(str, Enum):
     """
     提取模型类型
-
-    Attributes:
-        LLM: 大语言模型
-        VLM: 视觉语言模型
     """
-    LLM = "llm"
-    VLM = "vlm"
+    Model_1 = "Model 1"
+    Model_2 = "Model 2"
+    Model_3 = "Model 3"
 
 
 class EnabledStatus(str, Enum):

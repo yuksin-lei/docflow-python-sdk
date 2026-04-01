@@ -11,27 +11,26 @@ class WorkspaceInfo:
 
     workspace_id: str
     name: str
-    enterprise_id: int
     auth_scope: Optional[int] = None
-    manage_account_id: Optional[int] = None
-    account_id: Optional[int] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    description: Optional[str] = None
+    manage_account_id: Optional[str] = None
+    manage_account_name: Optional[str] = None
+    callback_url: Optional[str] = None
+    callback_retry_time: Optional[int] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "WorkspaceInfo":
         """从字典创建对象"""
+        manage_account_id = data.get("manage_account_id", data.get("manageAccountId"))
         return cls(
             workspace_id=str(data.get("workspace_id", data.get("workspaceId", ""))),
             name=data.get("name", ""),
-            enterprise_id=data.get("enterprise_id", data.get("enterpriseId", 0)),
             auth_scope=data.get("auth_scope", data.get("authScope")),
-            manage_account_id=data.get(
-                "manage_account_id", data.get("manageAccountId")
-            ),
-            account_id=data.get("account_id", data.get("accountId")),
-            created_at=data.get("created_at", data.get("createdAt")),
-            updated_at=data.get("updated_at", data.get("updatedAt")),
+            description=data.get("description"),
+            manage_account_id=str(manage_account_id) if manage_account_id is not None else None,
+            manage_account_name=data.get("manage_account_name", data.get("manageAccountName")),
+            callback_url=data.get("callback_url", data.get("callbackUrl")),
+            callback_retry_time=data.get("callback_retry_time", data.get("callbackRetryTime")),
         )
 
 
@@ -78,30 +77,24 @@ class WorkspaceDetailResponse:
 
     workspace_id: str
     name: str
-    enterprise_id: int
     auth_scope: Optional[int] = None
-    manage_account_id: Optional[int] = None
+    description: Optional[str] = None
+    manage_account_id: Optional[str] = None
     manage_account_name: Optional[str] = None
-    account_id: Optional[int] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
-    # 可以添加更多详细字段
+    callback_url: Optional[str] = None
+    callback_retry_time: Optional[int] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "WorkspaceDetailResponse":
         """从字典创建对象"""
+        manage_account_id = data.get("manage_account_id", data.get("manageAccountId"))
         return cls(
             workspace_id=str(data.get("workspace_id", data.get("workspaceId", ""))),
             name=data.get("name", ""),
-            enterprise_id=data.get("enterprise_id", data.get("enterpriseId", 0)),
             auth_scope=data.get("auth_scope", data.get("authScope")),
-            manage_account_id=data.get(
-                "manage_account_id", data.get("manageAccountId")
-            ),
-            manage_account_name=data.get(
-                "manage_account_name", data.get("manageAccountName")
-            ),
-            account_id=data.get("account_id", data.get("accountId")),
-            created_at=data.get("created_at", data.get("createdAt")),
-            updated_at=data.get("updated_at", data.get("updatedAt")),
+            description=data.get("description"),
+            manage_account_id=str(manage_account_id) if manage_account_id is not None else None,
+            manage_account_name=data.get("manage_account_name", data.get("manageAccountName")),
+            callback_url=data.get("callback_url", data.get("callbackUrl")),
+            callback_retry_time=data.get("callback_retry_time", data.get("callbackRetryTime")),
         )

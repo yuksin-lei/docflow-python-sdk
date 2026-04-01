@@ -63,7 +63,7 @@ def test_category_create_validation(client):
         client.category.create(
             workspace_id="123",
             name="",
-            extract_model=ExtractModel.LLM,
+            extract_model=ExtractModel.Model_1,
             sample_files=["test.pdf"],
             fields=[{"name": "field1"}]
         )
@@ -73,7 +73,7 @@ def test_category_create_validation(client):
         client.category.create(
             workspace_id="123",
             name="a" * 51,
-            extract_model=ExtractModel.LLM,
+            extract_model=ExtractModel.Model_1,
             sample_files=["test.pdf"],
             fields=[{"name": "field1"}]
         )
@@ -83,7 +83,7 @@ def test_category_create_validation(client):
         client.category.create(
             workspace_id="123",
             name="测试",
-            extract_model=ExtractModel.LLM,
+            extract_model=ExtractModel.Model_1,
             sample_files=[],
             fields=[{"name": "field1"}]
         )
@@ -93,7 +93,7 @@ def test_category_create_validation(client):
         client.category.create(
             workspace_id="123",
             name="测试",
-            extract_model=ExtractModel.LLM,
+            extract_model=ExtractModel.Model_1,
             sample_files=["test.pdf"],
             fields=[]
         )
@@ -116,7 +116,7 @@ def test_category_create_success(client, mock_workspace_id, mock_category_data):
             result = client.category.create(
                 workspace_id=mock_workspace_id,
                 name="新类别",
-                extract_model=ExtractModel.LLM,
+                extract_model=ExtractModel.Model_1,
                 sample_files=["invoice.pdf", "contract.pdf"],
                 fields=[
                     {"name": "发票号码", "type": "text"},

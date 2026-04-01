@@ -17,14 +17,14 @@ class TestEnums:
 
     def test_extract_model_values(self):
         """测试提取模型枚举值"""
-        assert ExtractModel.LLM == "llm"
-        assert ExtractModel.VLM == "vlm"
+        assert ExtractModel.Model_1 == "Model 1"
+        assert ExtractModel.Model_3 == "Model 3"
 
     def test_extract_model_members(self):
         """测试提取模型成员"""
         members = [m.value for m in ExtractModel]
-        assert "llm" in members
-        assert "vlm" in members
+        assert "Model 1" in members
+        assert "Model 3" in members
         assert len(members) == 2
 
     def test_enabled_status_values(self):
@@ -67,39 +67,39 @@ class TestEnums:
 
     def test_enum_comparison(self):
         """测试枚举比较"""
-        assert ExtractModel.LLM == ExtractModel.LLM
-        assert ExtractModel.LLM != ExtractModel.VLM
+        assert ExtractModel.Model_1 == ExtractModel.Model_1
+        assert ExtractModel.Model_1 != ExtractModel.Model_3
 
     def test_enum_in_list(self):
         """测试枚举在列表中"""
-        models = [ExtractModel.LLM, ExtractModel.VLM]
-        assert ExtractModel.LLM in models
-        assert ExtractModel.VLM in models
+        models = [ExtractModel.Model_1, ExtractModel.Model_3]
+        assert ExtractModel.Model_1 in models
+        assert ExtractModel.Model_3 in models
 
     def test_enum_string_representation(self):
         """测试枚举字符串表示"""
-        assert str(ExtractModel.LLM) == "ExtractModel.LLM"
+        assert str(ExtractModel.Model_1) == "ExtractModel.Model_1"
 
     def test_enum_value_access(self):
         """测试枚举值访问"""
-        assert ExtractModel.LLM.value == "llm"
+        assert ExtractModel.Model_1.value == "Model 1"
         assert EnabledFlag.ENABLED.value == 1
 
     def test_enum_name_access(self):
         """测试枚举名称访问"""
-        assert ExtractModel.LLM.name == "LLM"
+        assert ExtractModel.Model_1.name == "Model 1"
         assert EnabledFlag.ENABLED.name == "ENABLED"
 
     def test_enum_iteration(self):
         """测试枚举迭代"""
         models = list(ExtractModel)
         assert len(models) == 2
-        assert ExtractModel.LLM in models
-        assert ExtractModel.VLM in models
+        assert ExtractModel.Model_1 in models
+        assert ExtractModel.Model_3 in models
 
     def test_enum_from_value(self):
         """测试从值创建枚举"""
-        assert ExtractModel("llm") == ExtractModel.LLM
+        assert ExtractModel("Model 1") == ExtractModel.Model_1
         assert EnabledFlag(1) == EnabledFlag.ENABLED
 
     def test_enum_invalid_value(self):

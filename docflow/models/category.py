@@ -14,12 +14,13 @@ class CategoryInfo:
     """
     类别信息
 
-    对应后端: CategoryRespVO.CategoryDetail
     """
     id: str  # 类别ID (注意：后端使用 id 而不是 category_id)
     name: str
-    description: Optional[str] = None
-    enabled: Optional[int] = None  # 启用状态：0-未启用，1-已启用
+    description: Optional[str] = None   # 分类描述
+    category_prompt: Optional[str] = None  # 用于分类的提示词
+    extract_model: Optional[str] = None  # 抽取模型：Model 1/Model 2/Model 3/mixed
+    enabled: Optional[int] = None  # 启用状态：0-禁用，1-启用，2-草稿
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CategoryInfo":
@@ -28,6 +29,8 @@ class CategoryInfo:
             id=str(data.get("id") or data.get("category_id") or data.get("categoryId")),
             name=data.get("name"),
             description=data.get("description"),
+            category_prompt=data.get("category_prompt") or data.get("categoryPrompt"),
+            extract_model=data.get("extract_model") or data.get("extractModel"),
             enabled=data.get("enabled"),
         )
 
@@ -82,12 +85,12 @@ class TableInfo:
     """
     表格信息
 
-    对应后端: ListCategoryTablesResVO.Table
     """
     id: str  # 表格ID
     name: str
     prompt: Optional[str] = None  # 表格语义抽取提示词
     collect_from_multi_table: Optional[bool] = None  # 多表合并
+    extract_model: Optional[str] = None # 抽取模型
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "TableInfo":
@@ -97,6 +100,7 @@ class TableInfo:
             name=data.get("name"),
             prompt=data.get("prompt"),
             collect_from_multi_table=data.get("collectFromMultiTable") or data.get("collect_from_multi_table"),
+            extract_model=data.get("extractModel") or data.get("extract_model"),
         )
 
 
@@ -141,12 +145,19 @@ class FieldInfo:
     """
     字段信息
 
-    对应后端: ListCategoryFieldsResVO.Field
+    对应 OpenAPI CategoryField schema (CategoryFieldConfig + id)
     """
     id: str  # 字段ID
     name: str
     description: Optional[str] = None
-    enabled: Optional[int] = None  # 启用状态：0-未启用，1-已启用
+    prompt: Optional[str] = None  # 语义抽取提示词
+    use_prompt: Optional[bool] = None  # 是否使用语义提示词
+    alias: Optional[List[str]] = None  # 字段别名列表
+    identity: Optional[str] = None  # 导出字段名
+    multi_value: Optional[bool] = None  # 是否多值抽取
+    duplicate_value_distinct: Optional[bool] = None  # 是否重复值去重
+    transform_settings: Optional[Dict[str, Any]] = None  # 转换配置
+    extract_model: Optional[str] = None # 抽取模型
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "FieldInfo":
@@ -155,7 +166,14 @@ class FieldInfo:
             id=str(data.get("id") or data.get("field_id") or data.get("fieldId")),
             name=data.get("name"),
             description=data.get("description"),
-            enabled=data.get("enabled"),
+            prompt=data.get("prompt"),
+            use_prompt=data.get("use_prompt") or data.get("usePrompt"),
+            alias=data.get("alias"),
+            identity=data.get("identity"),
+            multi_value=data.get("multi_value") or data.get("multiValue"),
+            duplicate_value_distinct=data.get("duplicate_value_distinct") or data.get("duplicateValueDistinct"),
+            transform_settings=data.get("transform_settings") or data.get("transformSettings"),
+            extract_model = data.get("extract_model") or data.get("extractModel")
         )
 
 
@@ -170,6 +188,7 @@ class TableWithFields:
     name: str
     description: Optional[str] = None
     fields: List[FieldInfo] = field(default_factory=list)
+    extract_model: Optional[str] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "TableWithFields":
@@ -182,6 +201,7 @@ class TableWithFields:
             name=data.get("name"),
             description=data.get("description"),
             fields=fields,
+            extract_model=data.get("extract_model") or data.get("extractModel")
         )
 
 
