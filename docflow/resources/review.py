@@ -11,6 +11,7 @@ from ..models.review import (
     ReviewRuleCreateResponse
 )
 from .._constants import DEFAULT_PAGE, API_PREFIX
+from ..enums import ReviewModel
 from ..exceptions import ValidationError
 
 
@@ -371,6 +372,7 @@ class ReviewResource(BaseResource):
         repo_id: str,
         extract_task_ids: Optional[List[str]] = None,
         batch_number: Optional[str] = None,
+        model: Optional[ReviewModel] = None,
     ) -> Dict[str, Any]:
         """
         新建审核任务
@@ -381,6 +383,7 @@ class ReviewResource(BaseResource):
             repo_id: 审核规则库ID
             extract_task_ids: 抽取任务ID列表（可选）
             batch_number: 批次号（可选）
+            model: 审核模型，deepseek-r1, qwq-32b, qwen3-max, ORM-O1（可选）
 
         Returns:
             Dict[str, Any]: 包含 task_id 的响应
@@ -432,6 +435,8 @@ class ReviewResource(BaseResource):
             payload["extract_task_ids"] = extract_task_ids
         if batch_number is not None:
             payload["batch_number"] = batch_number
+        if model is not None:
+            payload["model"] = model.value if isinstance(model, ReviewModel) else model
 
         response = self.http_client.post(
             f"{API_PREFIX}/review/task/submit",
@@ -490,6 +495,7 @@ class ReviewResource(BaseResource):
         workspace_id: str,
         task_id: str,
         with_task_detail_url: Optional[bool] = None,
+        model: Optional[ReviewModel] = None,
     ) -> Dict[str, Any]:
         """
         获取审核结果
@@ -498,6 +504,7 @@ class ReviewResource(BaseResource):
             workspace_id: 空间ID
             task_id: 审核任务ID
             with_task_detail_url: 是否返回审核详情页URL（可选）
+            model: 审核模型，审核模型，deepseek-r1, qwq-32b, qwen3-max, ORM-O1（可选）
 
         Returns:
             Dict[str, Any]: 审核任务结果
@@ -524,6 +531,8 @@ class ReviewResource(BaseResource):
 
         if with_task_detail_url is not None:
             payload["with_task_detail_url"] = with_task_detail_url
+        if model is not None:
+            payload["model"] = model.value if isinstance(model, ReviewModel) else model
 
         response = self.http_client.post(
             f"{API_PREFIX}/review/task/result",

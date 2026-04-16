@@ -80,6 +80,22 @@ class MismatchAction(str, Enum):
     WARNING = "warning"
 
 
+class ReviewModel(str, Enum):
+    """
+    审核模型类型
+
+    Attributes:
+        DEEPSEEK_R1: deepseek-r1
+        QWQ_32B: qwq-32b
+        QWEN3_MAX: qwen3-max
+        ORM_O1: ORM-O1
+    """
+    DEEPSEEK_R1 = "deepseek-r1"
+    QWQ_32B = "qwq-32b"
+    QWEN3_MAX = "qwen3-max"
+    ORM_O1 = "ORM-O1"
+
+
 class RecognitionStatus(int, Enum):
     """
     文件识别状态

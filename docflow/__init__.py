@@ -24,6 +24,7 @@ from .enums import (
     AuthScope,
     FieldType,
     MismatchAction,
+    ReviewModel,
     RecognitionStatus,
 )
 
@@ -46,5 +47,6 @@ __all__ = [
     "AuthScope",
     "FieldType",
     "MismatchAction",
+    "ReviewModel",
     "RecognitionStatus",
 ]

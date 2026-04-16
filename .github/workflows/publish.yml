@@ -1,0 +1,80 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配 v1.0.0, v1.2.3 等格式的 tag
+
+jobs:
+  publish:
+    name: Build and Publish to PyPI
+    runs-on: ubuntu-latest
+
+    # 使用 PyPI 的 trusted publishers 功能
+    permissions:
+      id-token: write  # 用于 OIDC 认证
+      contents: write  # 用于创建 GitHub Release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify tag format
+        id: verify_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+          # 提取版本号（去掉 v 前缀）
+          VERSION=${TAG_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # 验证 tag 格式
+          if [[ ! $TAG_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+            echo "❌ Tag 格式错误: $TAG_NAME"
+            echo "✅ 正确格式示例: v1.0.0, v1.2.3, v2.0.0-beta.1"
+            exit 1
+          fi
+
+          echo "📌 检测到 tag: $TAG_NAME"
+          echo "📦 版本号: $VERSION"
+
+      - name: Verify version match
+        run: |
+          TAG_VERSION="${{ steps.verify_tag.outputs.version }}"
+          FILE_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+
+          echo "Tag 版本: $TAG_VERSION"
+          echo "文件版本: $FILE_VERSION"
+
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "❌ 版本不匹配！"
+            echo "   Tag 版本: $TAG_VERSION"
+            echo "   pyproject.toml 版本: $FILE_VERSION"
+            echo ""
+            echo "请确保 tag 版本号与 pyproject.toml 中的版本号一致"
+            exit 1
+          fi
+
+          echo "✅ 版本号匹配"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: |
+          python -m build
+          echo "📦 构建完成"
+          ls -lh dist/
+
+      - name: Check package
+        run: |
+          twine check dist/*
+          echo "✅ 包检查通过"
