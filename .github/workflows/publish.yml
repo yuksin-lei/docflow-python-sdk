@@ -78,3 +78,16 @@ jobs:
         run: |
           twine check dist/*
           echo "✅ 包检查通过"
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.verify_tag.outputs.tag_name }}
+          name: ${{ steps.verify_tag.outputs.tag_name }}
+          generate_release_notes: true
+          files: dist/*
