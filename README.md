@@ -158,7 +158,7 @@ fields = [
 category = client.category.create(
     workspace_id="123",
     name="发票类别",
-    extract_model=ExtractModel.Model_1,  # 使用枚举而非字符串 "Model 1"
+    extract_model=ExtractModel.Acgpt,  # 使用枚举而非字符串 "Acgpt"
     sample_files=[
         "/path/to/sample1.pdf",
         "/path/to/sample2.pdf"
@@ -172,7 +172,7 @@ print(f"类别ID: {category.category_id}")
 category = client.category.create(
     workspace_id="123",
     name="酒店水单",
-    extract_model=ExtractModel.Model_1,
+    extract_model=ExtractModel.Acgpt,
     sample_files=["/path/to/sample.pdf"],
     fields=[
         {"name": "入住日期"},
@@ -182,7 +182,7 @@ category = client.category.create(
         {
             "name": "费用明细",
             "prompt": "请抽取每行费用",
-            "extract_model": "Model 1",
+            "extract_model": "Acgpt",
             "fields": [  # 表格字段内嵌在 tables 中
                 {"name": "日期"},
                 {"name": "费用类型"},
@@ -399,10 +399,12 @@ from docflow import (
     FieldType,         # 字段类型
 )
 
-# ExtractModel - 提取模型
-ExtractModel.Model_1  # 速度快，抽取结果稳定
-ExtractModel.Model_2  # 适用复杂文档理解
-ExtractModel.Model_3  # 多模态，适用简单抽取
+# ExtractModel - 提取模型（V1.6 命名）
+ExtractModel.Auto      # 智能匹配抽取模型（字段级智能路由，由算法决定实际模型）
+ExtractModel.Acgpt     # 速度快，抽取结果稳定（原 Model 1）
+ExtractModel.Acgpt_VL  # 多模态，适用简单抽取（≤10 页）（原 Model 3）
+ExtractModel.DF_M1     # 适用复杂文档理解（原 Model 2）
+# 旧命名 ExtractModel.Model_1/Model_2/Model_3 已废弃，仍作为兼容别名保留
 
 # AuthScope - 权限范围
 AuthScope.PRIVATE  # 0 - 私有权限
@@ -453,7 +455,7 @@ workspace = client.workspace.create(
 category = client.category.create(
     workspace_id="123",
     name="发票类别",
-    extract_model=ExtractModel.Model_1,  # ✅ 避免拼写错误
+    extract_model=ExtractModel.Acgpt,  # ✅ 避免拼写错误
     sample_files=["/path/to/sample.pdf"],
     fields=[
         {
@@ -511,12 +513,12 @@ client.category.fields.add(
 
 ```python
 # ✅ 新代码（推荐）
-extract_model=ExtractModel.Model_1
+extract_model=ExtractModel.Acgpt
 auth_scope=AuthScope.PUBLIC
 transform_settings={"type": FieldType.DATETIME.value}
 
 # ✅ 旧代码（仍然支持）
-extract_model="Model 1"
+extract_model="Acgpt"          # 旧名 "Model 1" 亦兼容
 auth_scope=1
 transform_settings={"type": "datetime"}
 ```

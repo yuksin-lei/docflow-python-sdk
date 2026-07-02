@@ -93,7 +93,7 @@ class CategoryContext:
             name: 新的类别名称（可选）
             category_prompt: 新的类别提示（可选）
             enabled: 启用状态（EnabledFlag.DISABLED=0 或 EnabledFlag.ENABLED=1，可选）
-            extract_model: 提取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
+            extract_model: 提取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选；旧名 Model 1/2/3 兼容）
             **kwargs: 其他要更新的字段
         """
         return self._category_resource.update(
@@ -734,7 +734,7 @@ class WorkspaceContext:
 
         Args:
             name: 类别名称
-            extract_model: 提取模型（ExtractModel.Model_1 或 ExtractModel.Model_2 或 ExtractModel.Model_3）
+            extract_model: 提取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1；旧名 Model 1/2/3 兼容）
             sample_files: 样本文件列表
             fields: 字段配置列表
             category_prompt: 类别提示（可选）

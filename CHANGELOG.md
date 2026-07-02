@@ -5,6 +5,27 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.0] - 2026-07-02
+
+### Added
+
+- ✨ **抽取模型 V1.6 命名与新增 Auto 模型**（对齐后端 v2.11.0）
+  - `ExtractModel` 新增成员：`Auto`（智能匹配，字段级智能路由）、`Acgpt`、`Acgpt_VL`、`DF_M1`
+  - `Auto` 模式下由算法自动决定实际命中模型
+  - `Acgpt-VL` 为多模态模型，适用简单抽取（≤10 页）
+
+### Changed
+
+- 🔤 **抽取模型改名**：`Model 1 → Acgpt`、`Model 2 → DF-M1`、`Model 3 → Acgpt-VL`
+- ✅ `category.create/update`、`tables.add/update`、`fields.add/update` 的 `extract_model`
+  校验放开，接受全部新命名（同时兼容旧命名）
+- 📄 `/file/fetch` 抽取结果的字段/表格项新增透传 `configModel`（配置模型）、
+  `hitModelReason`（命中原因）字段（位于 `FileInfo.data`）
+
+### Deprecated
+
+- ⚠️ `ExtractModel.Model_1/Model_2/Model_3` 已废弃，保留为兼容别名，后端仍接受；请迁移到新命名
+
 ## [1.0.5] - 2026-06-01
 
 ### Added

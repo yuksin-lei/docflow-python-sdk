@@ -8,11 +8,29 @@ from enum import Enum
 
 class ExtractModel(str, Enum):
     """
-    提取模型类型
+    提取模型类型（V1.6 命名）
+
+    推荐使用新命名。后端同时兼容旧命名（Model 1/2/3），因此 SDK 保留旧成员作为
+    别名，但已标记为**废弃（deprecated）**，请尽快迁移到新命名。
+
+    | 新命名（推荐） | 旧命名（废弃） | 说明                          |
+    |--------------|--------------|-------------------------------|
+    | Auto         | -            | 智能匹配抽取模型（字段级智能路由，由算法决定实际模型） |
+    | Acgpt        | Model 1      | 速度快，抽取结果稳定             |
+    | Acgpt_VL     | Model 3      | 多模态，适用简单抽取（≤10 页）    |
+    | DF_M1        | Model 2      | 适用复杂文档理解                |
     """
-    Model_1 = "Model 1"
-    Model_2 = "Model 2"
-    Model_3 = "Model 3"
+    # ==================== 新命名（推荐） ====================
+    Auto = "Auto"          # 智能匹配抽取模型（字段级智能路由）
+    Acgpt = "Acgpt"        # 速度快，抽取结果稳定（原 Model 1）
+    Acgpt_VL = "Acgpt-VL"  # 多模态，适用简单抽取（≤10 页）（原 Model 3）
+    DF_M1 = "DF-M1"        # 适用复杂文档理解（原 Model 2）
+
+    # ============ 旧命名（已废弃，仅作兼容别名，后端仍接受） ============
+    # Deprecated: 请改用上方新命名。
+    Model_1 = "Model 1"    # 等价于 Acgpt
+    Model_2 = "Model 2"    # 等价于 DF_M1
+    Model_3 = "Model 3"    # 等价于 Acgpt_VL
 
 
 class EnabledStatus(str, Enum):
