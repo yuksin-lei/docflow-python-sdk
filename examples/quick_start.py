@@ -109,7 +109,7 @@ def main():
     baoxiao_category = client.category.create(
         workspace_id=workspace_id,
         name="REIMBURSEMENT_APPLICATION",
-        extract_model=ExtractModel.Model_1,
+        extract_model=ExtractModel.Acgpt,
         sample_files=[os.path.join(sample_dir, "报销申请单.XLS")],
         fields=[
             {"name": "申请人"},
@@ -143,7 +143,7 @@ def main():
     hotel_category = client.category.create(
         workspace_id=workspace_id,
         name="HOTEL_RECEIPT",
-        extract_model=ExtractModel.Model_1,
+        extract_model=ExtractModel.Acgpt,
         sample_files=[os.path.join(sample_dir, "sample_hotel_receipt.png")],
         fields=[
             {"name": "入住日期"},
@@ -194,7 +194,7 @@ def main():
     payment_category = client.category.create(
         workspace_id=workspace_id,
         name="PAYMENT_RECORD",
-        extract_model=ExtractModel.Model_1,
+        extract_model=ExtractModel.Acgpt,
         sample_files=[os.path.join(sample_dir, "sample_payment_record.png")],
         fields=[
             {"name": "交易流水号"},

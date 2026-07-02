@@ -16,16 +16,32 @@ class TestEnums:
     """枚举类型测试"""
 
     def test_extract_model_values(self):
-        """测试提取模型枚举值"""
+        """测试提取模型枚举值（新命名 + 兼容旧命名）"""
+        # 新命名（V1.6）
+        assert ExtractModel.Auto == "Auto"
+        assert ExtractModel.Acgpt == "Acgpt"
+        assert ExtractModel.Acgpt_VL == "Acgpt-VL"
+        assert ExtractModel.DF_M1 == "DF-M1"
+        # 旧命名（废弃，仍兼容）
         assert ExtractModel.Model_1 == "Model 1"
         assert ExtractModel.Model_3 == "Model 3"
 
     def test_extract_model_members(self):
-        """测试提取模型成员"""
+        """测试提取模型成员：4 个新命名 + 3 个兼容旧命名"""
         members = [m.value for m in ExtractModel]
+        assert "Auto" in members
+        assert "Acgpt" in members
+        assert "Acgpt-VL" in members
+        assert "DF-M1" in members
         assert "Model 1" in members
         assert "Model 3" in members
-        assert len(members) == 3
+        assert len(members) == 7
+
+    def test_extract_model_new_names_from_value(self):
+        """测试新命名字符串可反查枚举"""
+        assert ExtractModel("Auto") == ExtractModel.Auto
+        assert ExtractModel("Acgpt-VL") == ExtractModel.Acgpt_VL
+        assert ExtractModel("DF-M1") == ExtractModel.DF_M1
 
     def test_enabled_status_values(self):
         """测试启用状态枚举值"""
@@ -93,7 +109,9 @@ class TestEnums:
     def test_enum_iteration(self):
         """测试枚举迭代"""
         models = list(ExtractModel)
-        assert len(models) == 3
+        assert len(models) == 7
+        assert ExtractModel.Auto in models
+        assert ExtractModel.Acgpt in models
         assert ExtractModel.Model_1 in models
         assert ExtractModel.Model_3 in models
 

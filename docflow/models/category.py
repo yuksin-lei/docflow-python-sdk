@@ -27,7 +27,7 @@ class CategoryInfo:
     name: str
     description: Optional[str] = None   # 分类描述
     category_prompt: Optional[str] = None  # 用于分类的提示词
-    extract_model: Optional[str] = None  # 抽取模型：Model 1/Model 2/Model 3/mixed
+    extract_model: Optional[str] = None  # 抽取模型：Auto/Acgpt/Acgpt-VL/DF-M1/mixed（旧名 Model 1/2/3 兼容）
     enabled: Optional[int] = None  # 启用状态：0-禁用，1-启用，2-草稿
 
     @classmethod

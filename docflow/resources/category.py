@@ -27,6 +27,9 @@ from ..utils.file_handler import FileHandler
 from ..enums import ExtractModel, EnabledStatus, EnabledFlag, FieldType
 from .._constants import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, API_PREFIX
 
+# 合法的抽取模型取值集合：新命名 Auto/Acgpt/Acgpt-VL/DF-M1 + 兼容旧命名 Model 1/2/3
+_VALID_EXTRACT_MODELS = frozenset(m.value for m in ExtractModel)
+
 
 class CategoryResource(BaseResource):
     """
@@ -37,7 +40,7 @@ class CategoryResource(BaseResource):
         >>> category = client.category.create(
         ...     workspace_id="123",
         ...     name="发票类别",
-        ...     extract_model="Model 1",
+        ...     extract_model="Acgpt",
         ...     sample_files=["/path/to/sample.pdf"],
         ...     fields=[{"name": "发票号码"}]
         ... )
@@ -78,7 +81,7 @@ class CategoryResource(BaseResource):
         Args:
             workspace_id: 工作空间 ID
             name: 类别名称（最大 50 字符）
-            extract_model: 提取模型（ExtractModel.Model_1/Model_2/Model_3 或字符串 "Model 1"/"Model 2"/"Model 3"）
+            extract_model: 提取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1 或字符串 "Auto"/"Acgpt"/"Acgpt-VL"/"DF-M1"；旧名 "Model 1/2/3" 仍兼容）
             sample_files: 样本文件列表（支持文件路径、文件对象）
             fields: 字段配置列表，例如:
                 [
@@ -91,7 +94,7 @@ class CategoryResource(BaseResource):
                     {
                         "name": "费用明细",
                         "prompt": "请抽取每行费用",
-                        "extract_model": "Model 1",
+                        "extract_model": "Acgpt",
                         "collect_from_multi_table": False,
                         "fields": [{"name": "日期"}, {"name": "金额"}]
                     }
@@ -111,7 +114,7 @@ class CategoryResource(BaseResource):
             >>> category = client.category.create(
             ...     workspace_id="123",
             ...     name="发票类别",
-            ...     extract_model=ExtractModel.Model_1,
+            ...     extract_model=ExtractModel.Acgpt,
             ...     sample_files=[
             ...         "/path/to/sample1.pdf",
             ...         open("/path/to/sample2.pdf", "rb")
@@ -133,7 +136,7 @@ class CategoryResource(BaseResource):
             >>> category = client.category.create(
             ...     workspace_id="123",
             ...     name="发票类别",
-            ...     extract_model="Model 1",
+            ...     extract_model="Acgpt",
             ...     sample_files=["/path/to/sample.pdf"],
             ...     fields=[{"name": "发票号码"}]
             ... )
@@ -150,9 +153,9 @@ class CategoryResource(BaseResource):
 
         # 支持 ExtractModel 枚举和 str 类型
         extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-        if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+        if extract_model_value not in _VALID_EXTRACT_MODELS:
             raise ValidationError(
-                "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                 i18n_key='error.category.extract_model_invalid'
             )
 
@@ -295,7 +298,7 @@ class CategoryResource(BaseResource):
             name: 新的类别名称（可选）
             category_prompt: 新的类别提示（可选）
             enabled: 启用状态（EnabledFlag.DISABLED=0 或 EnabledFlag.ENABLED=1，可选）
-            extract_model: 提取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
+            extract_model: 提取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选）
             **kwargs: 其他要更新的字段
 
         Examples:
@@ -308,14 +311,14 @@ class CategoryResource(BaseResource):
             ...     name="更新后的类别名称",
             ...     category_prompt="新的提示",
             ...     enabled=EnabledFlag.ENABLED,
-            ...     extract_model=ExtractModel.Model_2
+            ...     extract_model=ExtractModel.DF_M1
             ... )
             >>>
             >>> # 也支持直接使用字符串
             >>> client.category.update(
             ...     workspace_id="123",
             ...     category_id="456",
-            ...     extract_model="Model 1"
+            ...     extract_model="Acgpt"
             ... )
         """
         # 参数校验
@@ -346,9 +349,9 @@ class CategoryResource(BaseResource):
         if extract_model is not None:
             # 支持 ExtractModel 枚举和 str 类型
             extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+            if extract_model_value not in _VALID_EXTRACT_MODELS:
                 raise ValidationError(
-                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                     i18n_key='error.category.extract_model_invalid'
                 )
             payload["extract_model"] = extract_model_value
@@ -562,7 +565,7 @@ class CategoryTableResource(BaseResource):
             name: 表格名称
             prompt: 表格语义抽取提示词（可选，最大200字符）
             collect_from_multi_table: 多表合并（可选）
-            extract_model: 表格级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
+            extract_model: 表格级别抽取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选）
             **kwargs: 其他表格配置参数
 
         Returns:
@@ -575,7 +578,7 @@ class CategoryTableResource(BaseResource):
             ...     category_id="456",
             ...     name="商品明细表",
             ...     prompt="请抽取每行的品名、数量和金额",
-            ...     extract_model=ExtractModel.Model_1
+            ...     extract_model=ExtractModel.Acgpt
             ... )
             >>> print(table.table_id)
         """
@@ -604,9 +607,9 @@ class CategoryTableResource(BaseResource):
         if extract_model is not None:
             # 支持 ExtractModel 枚举和 str 类型
             extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+            if extract_model_value not in _VALID_EXTRACT_MODELS:
                 raise ValidationError(
-                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                     i18n_key='error.table.extract_model_invalid'
                 )
             payload["extract_model"] = extract_model_value
@@ -644,7 +647,7 @@ class CategoryTableResource(BaseResource):
             collect_from_multi_table: 多表合并（必填）
             name: 新的表格名称（可选，最大50字符）
             prompt: 新的表格语义抽取提示词（可选，最大200字符）
-            extract_model: 表格级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
+            extract_model: 表格级别抽取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选）
             **kwargs: 其他要更新的字段
 
         Examples:
@@ -655,7 +658,7 @@ class CategoryTableResource(BaseResource):
             ...     table_id="789",
             ...     collect_from_multi_table=True,
             ...     name="更新后的表格名称",
-            ...     extract_model=ExtractModel.Model_2
+            ...     extract_model=ExtractModel.DF_M1
             ... )
         """
         # 参数校验
@@ -684,9 +687,9 @@ class CategoryTableResource(BaseResource):
         if extract_model is not None:
             # 支持 ExtractModel 枚举和 str 类型
             extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+            if extract_model_value not in _VALID_EXTRACT_MODELS:
                 raise ValidationError(
-                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                     i18n_key='error.table.extract_model_invalid'
                 )
             payload["extract_model"] = extract_model_value
@@ -930,7 +933,7 @@ class CategoryFieldResource(BaseResource):
             name: 字段名称
             description: 字段描述（可选）
             table_id: 字段所属表格id（可选）
-            extract_model: 字段级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选，仅支持普通字段）
+            extract_model: 字段级别抽取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选，仅支持普通字段）
             **kwargs: 其他字段配置参数，如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -957,7 +960,7 @@ class CategoryFieldResource(BaseResource):
             ...     category_id="456",
             ...     name="发票号码",
             ...     description="发票唯一标识",
-            ...     extract_model=ExtractModel.Model_1
+            ...     extract_model=ExtractModel.Acgpt
             ... )
             >>>
             >>> # 创建带日期时间转换的字段
@@ -987,7 +990,7 @@ class CategoryFieldResource(BaseResource):
             ...             "mode": MismatchAction.WARNING.value
             ...         }
             ...     },
-            ...     extract_model=ExtractModel.Model_2
+            ...     extract_model=ExtractModel.DF_M1
             ... )
         """
         # 参数校验
@@ -1015,9 +1018,9 @@ class CategoryFieldResource(BaseResource):
         if extract_model is not None:
             # 支持 ExtractModel 枚举和 str 类型
             extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+            if extract_model_value not in _VALID_EXTRACT_MODELS:
                 raise ValidationError(
-                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                     i18n_key='error.field.extract_model_invalid'
                 )
             payload["extract_model"] = extract_model_value
@@ -1094,7 +1097,7 @@ class CategoryFieldResource(BaseResource):
             name: 新的字段名称（可选）
             description: 新的描述（可选）
             table_id: 字段所属表格id（可选）
-            extract_model: 字段级别抽取模型（ExtractModel.Model_1/Model_2/Model_3，可选）
+            extract_model: 字段级别抽取模型（ExtractModel.Auto/Acgpt/Acgpt_VL/DF_M1，可选）
             **kwargs: 其他要更新的字段配置参数（不传的参数保持原值不变），如：
                 - prompt: 语义抽取提示词
                 - use_prompt: 是否使用语义提示词
@@ -1112,7 +1115,7 @@ class CategoryFieldResource(BaseResource):
             ...     category_id="456",
             ...     field_id="789",
             ...     name="更新后的字段名",
-            ...     extract_model=ExtractModel.Model_2
+            ...     extract_model=ExtractModel.DF_M1
             ... )
             >>>
             >>> # 设置别名
@@ -1170,9 +1173,9 @@ class CategoryFieldResource(BaseResource):
         if extract_model is not None:
             # 支持 ExtractModel 枚举和 str 类型
             extract_model_value = extract_model.value if isinstance(extract_model, ExtractModel) else extract_model
-            if extract_model_value not in ("Model 1", "Model 2", "Model 3"):
+            if extract_model_value not in _VALID_EXTRACT_MODELS:
                 raise ValidationError(
-                    "extract_model 必须是 ExtractModel.Model_1/Model_2/Model_3 或对应的字符串",
+                    "extract_model 必须是 ExtractModel 枚举成员（Auto/Acgpt/Acgpt-VL/DF-M1）或对应字符串",
                     i18n_key='error.field.extract_model_invalid'
                 )
             payload["extract_model"] = extract_model_value

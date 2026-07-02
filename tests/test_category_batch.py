@@ -323,12 +323,12 @@ def test_sample_batch_upload_validation_empty(client):
 
 
 def test_sample_batch_upload_validation_too_many(client):
-    """测试批量上传样本校验——超过10个文件"""
+    """测试批量上传样本校验——超过20个文件"""
     with pytest.raises(ValidationError):
         client.category.samples.batch_upload(
             workspace_id="123",
             category_id="456",
-            files=[f"file{i}.pdf" for i in range(11)],
+            files=[f"file{i}.pdf" for i in range(21)],
         )
 
 

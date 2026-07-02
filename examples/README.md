@@ -207,11 +207,11 @@ except APIError as e:
 from docflow import ExtractModel, FieldType, AuthScope
 
 # ✅ 推荐
-extract_model=ExtractModel.Model_1
+extract_model=ExtractModel.Acgpt   # 新命名（V1.6）：Auto/Acgpt/Acgpt-VL/DF-M1
 field_type=FieldType.DATETIME
 
 # ❌ 不推荐
-extract_model="Model 1"
+extract_model="Acgpt"
 field_type="datetime"
 ```
 

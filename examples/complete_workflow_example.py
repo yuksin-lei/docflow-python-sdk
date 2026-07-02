@@ -157,7 +157,7 @@ def scenario_1_invoice_processing():
         category = client.category.create(
             workspace_id=workspace_id,
             name="增值税专用发票",
-            extract_model=ExtractModel.Model_1,
+            extract_model=ExtractModel.Acgpt,
             sample_files=[
                 "/path/to/invoice_sample1.pdf",  # 替换为实际样本文件路径
                 "/path/to/invoice_sample2.pdf"

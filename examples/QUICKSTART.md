@@ -253,7 +253,7 @@ from docflow import ExtractModel
 category = client.category.create(
     workspace_id=workspace_id,
     name="报销申请单",
-    extract_model=ExtractModel.Model_1,
+    extract_model=ExtractModel.Acgpt,
     sample_files=["报销申请单.XLS"],
     fields=[
         {"name": "申请人"},

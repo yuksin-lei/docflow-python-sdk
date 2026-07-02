@@ -16,7 +16,7 @@ class FileInfo:
     category: Optional[str] = None
     recognition_status: Optional[int] = None
     verification_status: Optional[int] = None
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = None  # 抽取结果（字段/表格）。字段/表格项含 extractModel(实际命中模型)、configModel(配置模型，Auto 场景为 "Auto")、hitModelReason(命中原因)
     task_detail_url: Optional[str] = None
     document: Optional[Dict[str, Any]] = None
     task_type: Optional[str] = None
