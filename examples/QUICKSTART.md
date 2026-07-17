@@ -1,5 +1,7 @@
 # 快速开始 - 费用报销场景
 
+[简体中文](QUICKSTART.md) | [English](QUICKSTART.en.md)
+
 本指南将带你快速体验 DocFlow SDK 的核心功能，完成一个端到端的费用报销单据处理和审核流程。
 
 ## 🎯 场景说明
@@ -374,7 +376,7 @@ print(f"规则通过数: {review_result['statistics']['pass_count']}")
 
 ## 📚 下一步
 
-- 📖 查看 [主文档](/README.md)
+- 📖 查看 [主文档](../README.md)
 - 💻 浏览 [更多示例](README.md)
 - 🌐 访问 [DocFlow Web 页面](https://docflow.textin.com/)
 

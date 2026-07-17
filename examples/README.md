@@ -1,5 +1,7 @@
 # Docflow SDK 示例代码
 
+[简体中文](README.md) | [English](README.en.md)
+
 本目录包含 Docflow Python SDK 的详细使用示例,涵盖所有主要功能和实际业务场景。
 
 > 🚀 **新手推荐**：如果您是第一次使用，建议先查看 [快速开始指南 - 费用报销场景](QUICKSTART.md)，快速体验完整的端到端流程！
@@ -24,8 +26,6 @@
 | [review_examples.py](review_examples.py) | 审核规则资源完整示例 | 22个 |
 | [complete_workflow_example.py](complete_workflow_example.py) | 端到端业务流程示例 | 3个场景 |
 | [file_examples.py](file_examples.py) | 文件处理资源完整示例 | 17个 |
-| [review_examples.py](review_examples.py) | 审核规则资源完整示例 | 22个 |
-| [complete_workflow_example.py](complete_workflow_example.py) | 端到端业务流程示例 | 3个场景 |
 
 ## 🚀 快速开始
 

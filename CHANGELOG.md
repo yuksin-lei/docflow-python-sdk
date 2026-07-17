@@ -1,5 +1,7 @@
 # Changelog
 
+[简体中文](CHANGELOG.md) | [English](CHANGELOG.en.md)
+
 本文档记录 Docflow Python SDK 的所有重要变更。
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
