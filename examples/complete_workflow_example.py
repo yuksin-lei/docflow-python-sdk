@@ -299,8 +299,7 @@ def scenario_1_invoice_processing():
         for file in failed_files:
             print(f"  ✗ {file.name}")
             if file.failure_causes:
-                for cause in file.failure_causes:
-                    print(f"    原因: {cause}")
+                print(f"    原因: {file.failure_causes}")
 
     # 步骤6: 数据验证和修正
     print("\n[步骤6] 数据验证和修正...")

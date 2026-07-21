@@ -163,6 +163,49 @@ def test_repo_list_success(client, mock_workspace_id):
         assert result.repos[0].name == "发票审核规则库"
 
 
+def test_review_models_accept_future_fields_at_all_levels(
+    client, mock_workspace_id
+):
+    """测试审核响应及嵌套模型兼容 API 新增字段"""
+    mock_response = {
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "total": 1,
+            "page": 1,
+            "page_size": 10,
+            "future_list_field": "list-value",
+            "repos": [{
+                "repo_id": "repo_001",
+                "name": "审核规则库",
+                "future_repo_field": "repo-value",
+                "groups": [{
+                    "group_id": "group_001",
+                    "name": "规则组",
+                    "future_group_field": "group-value",
+                    "rules": [{
+                        "rule_id": "rule_001",
+                        "name": "规则",
+                        "future_rule_field": "rule-value",
+                    }],
+                }],
+            }],
+        },
+    }
+
+    with patch.object(client.http_client, 'get', return_value=mock_response):
+        result = client.review.list_repos(workspace_id=mock_workspace_id)
+
+    repo = result.repos[0]
+    group = repo.groups[0]
+    rule = group.rules[0]
+    assert result.future_list_field == "list-value"
+    assert repo.future_repo_field == "repo-value"
+    assert group.future_group_field == "group-value"
+    assert rule.future_rule_field == "rule-value"
+    assert rule.extra_fields == {"future_rule_field": "rule-value"}
+
+
 def test_repo_list_empty(client, mock_workspace_id):
     """测试获取审核规则库列表（空结果）"""
     # Mock API 响应

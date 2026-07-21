@@ -171,7 +171,7 @@ class FileResource(BaseResource):
                 i18n_key='error.file.upload_source_required'
             )
 
-        return FileUploadResponse(**response['result'])
+        return FileUploadResponse.from_dict(response['result'])
 
     def upload_sync(
         self,
@@ -328,7 +328,7 @@ class FileResource(BaseResource):
                 i18n_key='error.file.upload_source_required'
             )
 
-        return FileFetchResponse(**response['result'])
+        return FileFetchResponse.from_dict(response['result'])
 
     def fetch(
         self,
@@ -394,7 +394,7 @@ class FileResource(BaseResource):
             params=params
         )
 
-        return FileFetchResponse(**response['result'])
+        return FileFetchResponse.from_dict(response['result'])
 
     def iter(
         self,
@@ -488,7 +488,7 @@ class FileResource(BaseResource):
             json_data=payload
         )
 
-        return FileUpdateResponse(**response['result'])
+        return FileUpdateResponse.from_dict(response['result'])
 
     def batch_update(
         self,
@@ -508,7 +508,7 @@ class FileResource(BaseResource):
             json_data=updates
         )
 
-        return FileUpdateResponse(**response['result'])
+        return FileUpdateResponse.from_dict(response['result'])
 
     def delete(
         self,
@@ -553,7 +553,7 @@ class FileResource(BaseResource):
             json_data=payload
         )
 
-        return FileDeleteResponse(**response['result'])
+        return FileDeleteResponse.from_dict(response['result'])
 
     def extract_fields(
         self,
@@ -615,7 +615,7 @@ class FileResource(BaseResource):
             json_data=payload
         )
 
-        return FileFetchResponse(**response['result'])
+        return FileFetchResponse.from_dict(response['result'])
 
     def retry(
         self,

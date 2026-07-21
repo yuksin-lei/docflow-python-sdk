@@ -172,6 +172,26 @@ class TestFileModels:
         assert info.name == "test.pdf"
         assert info.format == "pdf"
 
+    def test_file_info_accepts_schema_and_future_fields(self):
+        """测试文件模型兼容当前 schema 字段及 API 未来新增字段"""
+        info = FileInfo.from_dict({
+            "id": "file_123",
+            "name": "test.pdf",
+            "format": "pdf",
+            "parsedDetail": {"status": "completed"},
+            "child_files": [{"id": "child_001"}],
+            "parser_params": {"dpi": 144},
+            "failure_causes": "文件解析失败",
+            "future_field": {"enabled": True},
+        })
+
+        assert info.parsedDetail == {"status": "completed"}
+        assert info.child_files == [{"id": "child_001"}]
+        assert info.parser_params == {"dpi": 144}
+        assert info.failure_causes == "文件解析失败"
+        assert info.extra_fields == {"future_field": {"enabled": True}}
+        assert info.future_field == {"enabled": True}
+
     def test_file_upload_response(self):
         """测试文件上传响应"""
         data = {
@@ -201,6 +221,17 @@ class TestFileModels:
         response = FileFetchResponse(**data)
         assert response.total == 0
         assert response.page == 1
+
+    def test_file_response_accepts_future_top_level_fields(self):
+        """测试文件响应模型兼容 API 顶层新增字段"""
+        response = FileFetchResponse.from_dict({
+            "files": [],
+            "total": 0,
+            "future_meta": "value",
+        })
+
+        assert response.extra_fields == {"future_meta": "value"}
+        assert response.future_meta == "value"
 
     def test_file_delete_response(self):
         """测试文件删除响应"""

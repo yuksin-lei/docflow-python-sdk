@@ -49,7 +49,7 @@ class ReviewResource(BaseResource):
             json_data=payload
         )
 
-        return ReviewRepoCreateResponse(**response['result'])
+        return ReviewRepoCreateResponse.from_dict(response['result'])
 
     def list_repos(
         self,
@@ -79,7 +79,7 @@ class ReviewResource(BaseResource):
             params=params
         )
 
-        return ReviewRepoListResponse(**response['result'])
+        return ReviewRepoListResponse.from_dict(response['result'])
 
     def get_repo(
         self,
@@ -106,7 +106,7 @@ class ReviewResource(BaseResource):
             params=params
         )
 
-        return ReviewRepoInfo(**response['result'])
+        return ReviewRepoInfo.from_dict(response['result'])
 
     def update_repo(
         self,
@@ -187,7 +187,7 @@ class ReviewResource(BaseResource):
             json_data=payload
         )
 
-        return ReviewGroupCreateResponse(**response['result'])
+        return ReviewGroupCreateResponse.from_dict(response['result'])
 
     def update_group(
         self,
@@ -291,7 +291,7 @@ class ReviewResource(BaseResource):
             json_data=payload
         )
 
-        return ReviewRuleCreateResponse(**response['result'])
+        return ReviewRuleCreateResponse.from_dict(response['result'])
 
     def update_rule(
         self,

@@ -1005,6 +1005,81 @@ def test_file_extract_fields_with_tables(client, mock_workspace_id):
         assert call_args[1]['json_data']['tables'][0]['name'] == "invoice_items"
 
 
+def test_file_detail_schema_and_future_fields_across_read_methods(
+    client, mock_workspace_id
+):
+    """测试五个文件读取入口兼容完整 schema 及未来新增字段"""
+    file_detail = {
+        "id": "file_001",
+        "task_id": "task_001",
+        "name": "test.pdf",
+        "format": "pdf",
+        "parsedDetail": {"status": "completed"},
+        "child_files": [{"id": "child_001"}],
+        "parser_params": {"dpi": 144},
+        "failure_causes": "解析失败",
+        "future_file_field": "future-value",
+    }
+    fetch_result = {
+        "total": 1,
+        "page": 1,
+        "page_size": 1000,
+        "files": [file_detail],
+        "future_response_field": "response-value",
+    }
+
+    with patch.object(client.http_client, 'post', return_value={
+        "code": 200,
+        "msg": "success",
+        "result": {
+            "batch_number": "batch_001",
+            "files": [file_detail],
+            "future_response_field": "response-value",
+        },
+    }):
+        upload_result = client.file.upload(
+            workspace_id=mock_workspace_id,
+            file_urls=["https://example.com/test.pdf"],
+        )
+
+    with patch.object(client.http_client, 'post', return_value={
+        "code": 200, "msg": "success", "result": fetch_result
+    }):
+        upload_sync_result = client.file.upload_sync(
+            workspace_id=mock_workspace_id,
+            file_urls=["https://example.com/test.pdf"],
+        )
+        extract_result = client.file.extract_fields(
+            workspace_id=mock_workspace_id,
+            task_id="task_001",
+            fields=[{"key": "amount"}],
+        )
+
+    with patch.object(client.http_client, 'get', return_value={
+        "code": 200, "msg": "success", "result": fetch_result
+    }):
+        fetch_response = client.file.fetch(workspace_id=mock_workspace_id)
+        iter_files = list(client.file.iter(workspace_id=mock_workspace_id))
+
+    results = [
+        upload_result,
+        upload_sync_result,
+        fetch_response,
+        extract_result,
+    ]
+    for result in results:
+        assert result.future_response_field == "response-value"
+        assert result.extra_fields["future_response_field"] == "response-value"
+        assert result.files[0].parsedDetail == {"status": "completed"}
+        assert result.files[0].child_files == [{"id": "child_001"}]
+        assert result.files[0].parser_params == {"dpi": 144}
+        assert result.files[0].failure_causes == "解析失败"
+        assert result.files[0].future_file_field == "future-value"
+
+    assert len(iter_files) == 1
+    assert iter_files[0].future_file_field == "future-value"
+
+
 # ==================== retry 测试 ====================
 
 def test_file_retry_success(client, mock_workspace_id):

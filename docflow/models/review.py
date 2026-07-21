@@ -4,10 +4,11 @@
 from typing import List, Optional, Any, Dict
 from dataclasses import dataclass, field
 from .._constants import DEFAULT_PAGE
+from ._base import ForwardCompatibleModel
 
 
 @dataclass
-class ReviewRule:
+class ReviewRule(ForwardCompatibleModel):
     """审核规则"""
     rule_id: str
     name: str
@@ -18,7 +19,7 @@ class ReviewRule:
 
 
 @dataclass
-class ReviewGroup:
+class ReviewGroup(ForwardCompatibleModel):
     """审核规则组"""
     group_id: str
     name: str
@@ -28,13 +29,13 @@ class ReviewGroup:
         """初始化后处理"""
         if isinstance(self.rules, list):
             self.rules = [
-                ReviewRule(**r) if isinstance(r, dict) else r
+                ReviewRule.from_dict(r) if isinstance(r, dict) else r
                 for r in self.rules
             ]
 
 
 @dataclass
-class ReviewRepoInfo:
+class ReviewRepoInfo(ForwardCompatibleModel):
     """审核规则库信息"""
     repo_id: str
     name: str
@@ -45,19 +46,19 @@ class ReviewRepoInfo:
         """初始化后处理"""
         if isinstance(self.groups, list):
             self.groups = [
-                ReviewGroup(**g) if isinstance(g, dict) else g
+                ReviewGroup.from_dict(g) if isinstance(g, dict) else g
                 for g in self.groups
             ]
 
 
 @dataclass
-class ReviewRepoCreateResponse:
+class ReviewRepoCreateResponse(ForwardCompatibleModel):
     """创建审核规则库响应"""
     repo_id: str
 
 
 @dataclass
-class ReviewRepoListResponse:
+class ReviewRepoListResponse(ForwardCompatibleModel):
     """审核规则库列表响应"""
     repos: List[ReviewRepoInfo] = field(default_factory=list)
     total: int = 0
@@ -68,18 +69,18 @@ class ReviewRepoListResponse:
         """初始化后处理"""
         if isinstance(self.repos, list):
             self.repos = [
-                ReviewRepoInfo(**r) if isinstance(r, dict) else r
+                ReviewRepoInfo.from_dict(r) if isinstance(r, dict) else r
                 for r in self.repos
             ]
 
 
 @dataclass
-class ReviewGroupCreateResponse:
+class ReviewGroupCreateResponse(ForwardCompatibleModel):
     """创建审核规则组响应"""
     group_id: str
 
 
 @dataclass
-class ReviewRuleCreateResponse:
+class ReviewRuleCreateResponse(ForwardCompatibleModel):
     """创建审核规则响应"""
     rule_id: str
