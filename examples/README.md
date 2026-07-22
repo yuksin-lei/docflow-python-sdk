@@ -10,9 +10,9 @@
 
 ### 快速开始
 
-| 文件 | 说明 | 推荐指数 |
-|------|------|---------|
-| [quick_start.py](quick_start.py) | 🌟 费用报销场景快速开始 | ⭐⭐⭐⭐⭐ |
+| 中文版 | English | 说明 | 推荐指数 |
+|--------|---------|------|---------|
+| [quick_start.py](quick_start.py) | [quick_start_en.py](quick_start_en.py) | 🌟 费用报销场景快速开始 | ⭐⭐⭐⭐⭐ |
 
 **适合人群**：第一次使用 DocFlow SDK 的用户  
 **包含内容**：创建空间 → 配置类别 → 上传文件 → 抽取结果 → 配置审核 → 审核结果  
@@ -20,12 +20,12 @@
 
 ### 基础示例
 
-| 文件 | 说明 | 包含示例数量 |
-|------|------|--------------|
-| [quick_start.py](quick_start.py) | 文件处理流程快速启动示例 | 1个 |
-| [review_examples.py](review_examples.py) | 审核规则资源完整示例 | 22个 |
-| [complete_workflow_example.py](complete_workflow_example.py) | 端到端业务流程示例 | 3个场景 |
-| [file_examples.py](file_examples.py) | 文件处理资源完整示例 | 17个 |
+| 中文版 | English | 说明 | 包含示例数量 |
+|--------|---------|------|--------------|
+| [quick_start.py](quick_start.py) | [quick_start_en.py](quick_start_en.py) | 文件处理流程快速启动示例 | 1个 |
+| [review_examples.py](review_examples.py) | [review_examples_en.py](review_examples_en.py) | 审核规则资源完整示例 | 22个 |
+| [complete_workflow_example.py](complete_workflow_example.py) | [complete_workflow_example_en.py](complete_workflow_example_en.py) | 端到端业务流程示例 | 3个场景 |
+| [file_examples.py](file_examples.py) | [file_examples_en.py](file_examples_en.py) | 文件处理资源完整示例 | 17个 |
 
 ## 🚀 快速开始
 
@@ -81,6 +81,9 @@ python examples/review_examples.py
 
 # 运行完整工作流程示例
 python examples/complete_workflow_example.py
+
+# 英文版样例使用对应的 _en.py 文件，例如：
+python examples/quick_start_en.py
 ```
 
 ## 📖 示例详解

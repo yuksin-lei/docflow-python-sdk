@@ -10,20 +10,20 @@ This directory contains detailed Docflow Python SDK examples covering the primar
 
 ### Recommended starting point
 
-| File | Description | Recommendation |
-|------|-------------|----------------|
-| [quick_start.py](quick_start.py) | Expense reimbursement quick start | ⭐⭐⭐⭐⭐ |
+| English | 中文版 | Description | Recommendation |
+|---------|--------|-------------|----------------|
+| [quick_start_en.py](quick_start_en.py) | [quick_start.py](quick_start.py) | Expense reimbursement quick start | ⭐⭐⭐⭐⭐ |
 
 This example creates a workspace, configures categories, uploads files, reads extraction results, configures review rules, and reads review results. It normally takes about 2–3 minutes, excluding service-side processing time.
 
 ### Examples
 
-| File | Description | Coverage |
-|------|-------------|----------|
-| [quick_start.py](quick_start.py) | Quick file-processing workflow | 1 workflow |
-| [file_examples.py](file_examples.py) | Complete file resource examples | 17 examples |
-| [review_examples.py](review_examples.py) | Complete review resource examples | 22 examples |
-| [complete_workflow_example.py](complete_workflow_example.py) | End-to-end business workflows | 3 scenarios |
+| English | 中文版 | Description | Coverage |
+|---------|--------|-------------|----------|
+| [quick_start_en.py](quick_start_en.py) | [quick_start.py](quick_start.py) | Quick file-processing workflow | 1 workflow |
+| [file_examples_en.py](file_examples_en.py) | [file_examples.py](file_examples.py) | Complete file resource examples | 17 examples |
+| [review_examples_en.py](review_examples_en.py) | [review_examples.py](review_examples.py) | Complete review resource examples | 22 examples |
+| [complete_workflow_example_en.py](complete_workflow_example_en.py) | [complete_workflow_example.py](complete_workflow_example.py) | End-to-end business workflows | 3 scenarios |
 
 ## 🚀 Getting Started
 
@@ -59,19 +59,19 @@ pip install -e .
 ### 3. Run an example
 
 ```bash
-python examples/quick_start.py
-python examples/file_examples.py
-python examples/review_examples.py
-python examples/complete_workflow_example.py
+python examples/quick_start_en.py
+python examples/file_examples_en.py
+python examples/review_examples_en.py
+python examples/complete_workflow_example_en.py
 ```
 
 ## 📖 Example Details
 
-### Quick start (`quick_start.py`)
+### Quick start (`quick_start_en.py`)
 
 Implements an expense reimbursement workflow. See the [Quick Start guide](QUICKSTART.en.md).
 
-### File processing (`file_examples.py`)
+### File processing (`file_examples_en.py`)
 
 - Basic operations: local, URL, synchronous, and parameterized uploads
 - Queries: lists, filters, individual files, and automatic pagination
@@ -79,7 +79,7 @@ Implements an expense reimbursement workflow. See the [Quick Start guide](QUICKS
 - Advanced operations: extra fields, table fields, retry, and category amendment
 - Deletion and a complete file workflow
 
-### Review rules (`review_examples.py`)
+### Review rules (`review_examples_en.py`)
 
 - Review repositories: create, list, fetch, update, and delete
 - Rule groups: create, update, and delete
@@ -87,7 +87,7 @@ Implements an expense reimbursement workflow. See the [Quick Start guide](QUICKS
 - Tasks: submit by file or batch, fetch results, retry tasks or rules, and delete tasks
 - Complete and chained review workflows
 
-### Complete workflows (`complete_workflow_example.py`)
+### Complete workflows (`complete_workflow_example_en.py`)
 
 The three scenarios demonstrate:
 
@@ -145,7 +145,7 @@ all_files = list(client.file.iter(workspace_id="123"))
 
 Use batch field, table, sample, and file methods when processing multiple items. This reduces network round trips while preserving consistent server-side behavior.
 
-## 🤝 Contributing
+## 🤝 Contributing 
 
 When adding an example, update both `README.md` and `README.en.md`. Never commit credentials or sample documents containing sensitive data.
 

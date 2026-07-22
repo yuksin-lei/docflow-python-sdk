@@ -82,6 +82,8 @@ cd examples
 python quick_start.py
 ```
 
+英文版运行命令：`python quick_start_en.py`。
+
 ## 📊 示例输出
 
 运行成功后，将看到如下输出：

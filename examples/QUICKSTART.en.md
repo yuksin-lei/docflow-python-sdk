@@ -28,7 +28,8 @@ pip install docflow-sdk
 
 ### 2. Obtain credentials
 
-Sign in to the [TextIn console](https://www.textin.com/console/dashboard/setting) and obtain:
+https://www.textin.ai/console/dashboard/overview
+Sign in to the [TextIn console](https://www.textin.ai/console/dashboard/setting) and obtain:
 
 - `x-ti-app-id`
 - `x-ti-secret-code`
@@ -77,7 +78,7 @@ From the repository root:
 
 ```bash
 cd examples
-python quick_start.py
+python quick_start_en.py
 ```
 
 The example will:
@@ -235,7 +236,7 @@ rule = client.review.create_rule(
 )
 ```
 
-Exact rule parameters should match the server configuration and the fields created for each category. See `quick_start.py` for the complete executable definitions.
+Exact rule parameters should match the server configuration and the fields created for each category. See `quick_start_en.py` for the complete executable definitions.
 
 ### Submit a review task
 
@@ -298,9 +299,9 @@ Credentials and sample files
 
 - Read the main [SDK documentation](../README.en.md).
 - Browse the [examples guide](README.en.md).
-- Review [file_examples.py](file_examples.py) for file operations.
-- Review [review_examples.py](review_examples.py) for review resources.
-- Review [complete_workflow_example.py](complete_workflow_example.py) for larger workflows.
+- Review [file_examples_en.py](file_examples_en.py) for file operations.
+- Review [review_examples_en.py](review_examples_en.py) for review resources.
+- Review [complete_workflow_example_en.py](complete_workflow_example_en.py) for larger workflows.
 
 ## ⚠️ Notes
 
